@@ -10,7 +10,7 @@ It's preferred to put specific block tests into same spec file, e.g. all Markdow
 ```(javascript)
 describe( "Block under test @jetpack", function() {
   describe( "Test case 1", function() {
-    step( 'Test step 1', function() {
+    it( 'Test step 1', function() {
       ...
     } )
   } )
@@ -25,13 +25,13 @@ You might noticed `@jetpack` - which labels this spec file to be run in CircleCI
 At this point we are using jurassic.ninja sits for testing blocks. Which means every new test should start launching new JN site & connecting Jetpack:
 
 ```(javascript)
-step( 'Can create wporg site and connect Jetpack', async function() {
-  this.timeout( mochaTimeOut * 12 );
+it( 'Can create wporg site and connect Jetpack', async function() {
+  jest.setTimeout( mochaTimeOut * 12 );
   const jnFlow = new JetpackConnectFlow( driver, 'jetpackConnectUser', 'gutenpack' );
   return await jnFlow.connectFromWPAdmin();
 } );
 
-step( 'Can start new post', async function() {
+it( 'Can start new post', async function() {
   await WPAdminSidebar.refreshIfJNError( driver );
   const wpAdminSidebar = await WPAdminSidebar.Expect( driver );
   return await wpAdminSidebar.selectNewPost();

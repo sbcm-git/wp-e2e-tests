@@ -35,7 +35,7 @@ All pages have asynchronous functions. Constructors for pages can't be asynchron
 Don't do:
 
 ```
-step( 'Can select domain only from the domain first choice page', function() {
+it( 'Can select domain only from the domain first choice page', function() {
 	const domainFirstChoicePage = new DomainFirstPage( driver );
 	return await domainFirstChoicePage.chooseJustBuyTheDomain();
 } );
@@ -44,7 +44,7 @@ step( 'Can select domain only from the domain first choice page', function() {
 Instead you should do this if you're expecting a page to appear during a flow:
 
 ```
-step( 'Can select domain only from the domain first choice page', function() {
+it( 'Can select domain only from the domain first choice page', function() {
 	const domainFirstChoicePage = await DomainFirstPage.Expect( driver );
 	return await domainFirstChoicePage.chooseJustBuyTheDomain();
 } );
@@ -54,7 +54,7 @@ or this to directly visit a page:
 
 
 ```
-step( 'Can select domain only from the domain first choice page', function() {
+it( 'Can select domain only from the domain first choice page', function() {
 	const domainFirstChoicePage = await DomainFirstPage.Visit( driver );
 	return await domainFirstChoicePage.chooseJustBuyTheDomain();
 } );
@@ -69,7 +69,7 @@ It is preferred to use `const`, or `lets`, instead of `this.`, as the scope is n
 For example:
 
 ```
-step( 'Can select domain only from the domain first choice page', function() {
+it( 'Can select domain only from the domain first choice page', function() {
 	this.domainFirstChoicePage = await DomainFirstPage.Expect( driver );
 	return await this.domainFirstChoicePage.chooseJustBuyTheDomain();
 } );
@@ -78,7 +78,7 @@ step( 'Can select domain only from the domain first choice page', function() {
 can use a `const` instead:
 
 ```
-step( 'Can select domain only from the domain first choice page', function() {
+it( 'Can select domain only from the domain first choice page', function() {
 	const domainFirstChoicePage = new DomainFirstPage( driver );
 	return await domainFirstChoicePage.chooseJustBuyTheDomain();
 } );
@@ -91,7 +91,7 @@ Passing arrow functions (“lambdas”) to Mocha is discouraged. Lambdas lexical
 Avoid:
 
 ```
-step( 'We can set the sandbox cookie for payments', () => {
+it( 'We can set the sandbox cookie for payments', () => {
 	const wPHomePage = await WPHomePage.Visit( driver );
 	await wPHomePage.checkURL( locale );
 } );
@@ -100,7 +100,7 @@ step( 'We can set the sandbox cookie for payments', () => {
 instead:
 
 ```
-step( 'We can set the sandbox cookie for payments', async function() {
+it( 'We can set the sandbox cookie for payments', async function() {
 	const wPHomePage = await WPHomePage.Visit( driver );
 	await wPHomePage.checkURL( locale );
 } );
@@ -152,11 +152,11 @@ describe(
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'First step', async function() {
+		it( 'First step', async function() {
 			// Do something with a page
 		} );
 
-		step( 'Second step', async function() {
+		it( 'Second step', async function() {
 			// Do something next - this will only execute if the first step doesn't fail
 		} );
 		
@@ -174,7 +174,7 @@ describe(
 
 Sometimes we don't want a `step` block to fail on error - say if we're cleaning up after doing an action and it doesn't matter what happens. As we use async methods using a standard try/catch won't work as the promise itself will still fail. Instead, return an async method that catches the error result:
 ```
-step( 'Can delete our newly created account', async function() {
+it( 'Can delete our newly created account', async function() {
 	return ( async () => {
 		const closeAccountPage = await new CloseAccountPage( driver );
 		await closeAccountPage.chooseCloseAccount();

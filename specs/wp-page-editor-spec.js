@@ -26,32 +26,32 @@ const host = dataHelper.getJetpackHost();
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
-	this.timeout( mochaTimeOut );
+describe( `[${ host }] Editor: Pages (${ screenSize })`, () => {
+	jest.setTimeout( mochaTimeOut );
 
-	describe( 'Public Pages: @parallel @jetpack', function() {
+	describe( 'Public Pages: @parallel @jetpack', () => {
 		let fileDetails;
 		const pageTitle = dataHelper.randomPhrase();
 		const pageQuote =
 			'If you have the same problem for a long time, maybe it’s not a problem. Maybe it’s a fact..\n— Itzhak Rabin';
 
 		// Create image file for upload
-		before( async function() {
+		beforeAll( async function () {
 			fileDetails = await mediaHelper.createFile();
 			return fileDetails;
 		} );
 
-		step( 'Can log in', async function() {
+		it( 'Can log in', async () => {
 			const loginFlow = new LoginFlow( driver );
 			await loginFlow.loginAndStartNewPage();
 		} );
 
-		step( 'Can enter page title, content and image', async function() {
+		it( 'Can enter page title, content and image', async () => {
 			const editorPage = await EditorPage.Expect( driver );
 			await editorPage.enterTitle( pageTitle );
 			await editorPage.enterContent( pageQuote + '\n' );
@@ -61,14 +61,14 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 			assert.strictEqual( errorShown, false, 'There is an error shown on the editor page!' );
 		} );
 
-		step( 'Can disable sharing buttons', async function() {
+		it( 'Can disable sharing buttons', async () => {
 			const postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
 			await postEditorSidebarComponent.expandSharingSection();
 			await postEditorSidebarComponent.setSharingButtons( false );
 			await postEditorSidebarComponent.closeSharingSection();
 		} );
 
-		step( 'Can launch page preview', async function() {
+		it( 'Can launch page preview', async () => {
 			const postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
 			await postEditorSidebarComponent.hideComponentIfNecessary();
 
@@ -77,7 +77,7 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 			await postEditorToolbarComponent.launchPreview();
 		} );
 
-		step( 'Can see correct page title in preview', async function() {
+		it( 'Can see correct page title in preview', async () => {
 			const pagePreviewComponent = await PagePreviewComponent.Expect( driver );
 			await pagePreviewComponent.displayed();
 			let actualPageTitle = await pagePreviewComponent.pageTitle();
@@ -88,21 +88,21 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 			);
 		} );
 
-		step( 'Can see correct page content in preview', async function() {
+		it( 'Can see correct page content in preview', async () => {
 			const pagePreviewComponent = await PagePreviewComponent.Expect( driver );
 			let content = await pagePreviewComponent.pageContent();
 			assert.strictEqual(
 				content.indexOf( pageQuote ) > -1,
 				true,
 				'The page preview content (' +
-					content +
-					') does not include the expected content (' +
-					pageQuote +
-					')'
+				content +
+				') does not include the expected content (' +
+				pageQuote +
+				')'
 			);
 		} );
 
-		step( 'Can see the image uploaded in the preview', async function() {
+		it( 'Can see the image uploaded in the preview', async () => {
 			const pagePreviewComponent = await PagePreviewComponent.Expect( driver );
 			const imageDisplayed = await pagePreviewComponent.imageDisplayed( fileDetails );
 			return assert.strictEqual(
@@ -112,17 +112,17 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 			);
 		} );
 
-		step( 'Can close page preview', async function() {
+		it( 'Can close page preview', async () => {
 			const pagePreviewComponent = await PagePreviewComponent.Expect( driver );
 			await pagePreviewComponent.close();
 		} );
 
-		step( 'Can publish and preview published content', async function() {
+		it( 'Can publish and preview published content', async () => {
 			const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
 			await postEditorToolbarComponent.publishThePost( { useConfirmStep: true } );
 		} );
 
-		step( 'Can see correct page title in preview', async function() {
+		it( 'Can see correct page title in preview', async () => {
 			const pagePreviewComponent = await PagePreviewComponent.Expect( driver );
 			await pagePreviewComponent.displayed();
 			let actualPageTitle = await pagePreviewComponent.pageTitle();
@@ -133,38 +133,38 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 			);
 		} );
 
-		step( 'Can see correct page content in preview', async function() {
+		it( 'Can see correct page content in preview', async () => {
 			const pagePreviewComponent = await PagePreviewComponent.Expect( driver );
 			const content = await pagePreviewComponent.pageContent();
 			assert.strictEqual(
 				content.indexOf( pageQuote ) > -1,
 				true,
 				'The page preview content (' +
-					content +
-					') does not include the expected content (' +
-					pageQuote +
-					')'
+				content +
+				') does not include the expected content (' +
+				pageQuote +
+				')'
 			);
 		} );
 
-		step( 'Can see the image uploaded in the preview', async function() {
+		it( 'Can see the image uploaded in the preview', async () => {
 			const pagePreviewComponent = await PagePreviewComponent.Expect( driver );
 			const imageDisplayed = await pagePreviewComponent.imageDisplayed( fileDetails );
 			assert.strictEqual( imageDisplayed, true, 'Could not see the image in the web preview' );
 		} );
 
-		step( 'Can close page preview', async function() {
+		it( 'Can close page preview', async () => {
 			const pagePreviewComponent = await PagePreviewComponent.Expect( driver );
 			return await pagePreviewComponent.edit();
 		} );
 
-		step( 'Can view content', async function() {
+		it( 'Can view content', async () => {
 			const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
 			await postEditorToolbarComponent.displayed();
 			await postEditorToolbarComponent.viewPublishedPostOrPage();
 		} );
 
-		step( 'Can see correct page title', async function() {
+		it( 'Can see correct page title', async () => {
 			const viewPagePage = await ViewPagePage.Expect( driver );
 			let actualPageTitle = await viewPagePage.pageTitle();
 			assert.strictEqual(
@@ -174,21 +174,21 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 			);
 		} );
 
-		step( 'Can see correct page content', async function() {
+		it( 'Can see correct page content', async () => {
 			const viewPagePage = await ViewPagePage.Expect( driver );
 			let content = await viewPagePage.pageContent();
 			assert.strictEqual(
 				content.indexOf( pageQuote ) > -1,
 				true,
 				'The page content (' +
-					content +
-					') does not include the expected content (' +
-					pageQuote +
-					')'
+				content +
+				') does not include the expected content (' +
+				pageQuote +
+				')'
 			);
 		} );
 
-		step( "Can't see sharing buttons", async function() {
+		it( "Can't see sharing buttons", async () => {
 			const viewPagePage = await ViewPagePage.Expect( driver );
 			let visible = await viewPagePage.sharingButtonsVisible();
 			assert.strictEqual(
@@ -198,30 +198,30 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 			);
 		} );
 
-		step( 'Can see the image uploaded displayed', async function() {
+		it( 'Can see the image uploaded displayed', async () => {
 			const viewPagePage = await ViewPagePage.Expect( driver );
 			let imageDisplayed = await viewPagePage.imageDisplayed( fileDetails );
 			assert.strictEqual( imageDisplayed, true, 'Could not see the image in the published page' );
 		} );
 
-		after( async function() {
+		afterAll( async function () {
 			if ( fileDetails ) {
 				await mediaHelper.deleteFile( fileDetails );
 			}
 		} );
 	} );
 
-	describe( 'Private Pages: @parallel @jetpack', function() {
+	describe( 'Private Pages: @parallel @jetpack', () => {
 		let pageTitle = dataHelper.randomPhrase();
 		let pageQuote =
 			'Few people know how to take a walk. The qualifications are endurance, plain clothes, old shoes, an eye for nature, good humor, vast curiosity, good speech, good silence and nothing too much.\n— Ralph Waldo Emerson\n';
 
-		step( 'Can log in', async function() {
+		it( 'Can log in', async () => {
 			const loginFlow = new LoginFlow( driver );
 			await loginFlow.loginAndStartNewPage();
 		} );
 
-		step( 'Can enter page title and content', async function() {
+		it( 'Can enter page title and content', async () => {
 			const editorPage = await EditorPage.Expect( driver );
 			await editorPage.enterTitle( pageTitle );
 			await editorPage.enterContent( pageQuote );
@@ -229,20 +229,23 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 			return await postEditorToolbarComponent.ensureSaved();
 		} );
 
-		step( 'Can set visibility to private which immediately publishes it', async function() {
-			const postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
-			await postEditorSidebarComponent.setVisibilityToPrivate();
-			const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
-			return await postEditorToolbarComponent.waitForSuccessViewPostNotice();
-		} );
+		it(
+			'Can set visibility to private which immediately publishes it',
+			async () => {
+				const postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
+				await postEditorSidebarComponent.setVisibilityToPrivate();
+				const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
+				return await postEditorToolbarComponent.waitForSuccessViewPostNotice();
+			}
+		);
 
 		if ( host === 'WPCOM' ) {
-			step( 'Can view content', async function() {
+			it( 'Can view content', async () => {
 				const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
 				await postEditorToolbarComponent.viewPublishedPostOrPage();
 			} );
 
-			step( 'Can view page title as logged in user', async function() {
+			it( 'Can view page title as logged in user', async () => {
 				const viewPagePage = await ViewPagePage.Expect( driver );
 				const actualPageTitle = await viewPagePage.pageTitle();
 				assert.strictEqual(
@@ -252,84 +255,93 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 				);
 			} );
 
-			step( 'Can view page content as logged in user', async function() {
+			it( 'Can view page content as logged in user', async () => {
 				const viewPagePage = await ViewPagePage.Expect( driver );
 				const content = await viewPagePage.pageContent();
 				assert.strictEqual(
 					content.indexOf( pageQuote ) > -1,
 					true,
 					'The page content (' +
-						content +
-						') does not include the expected content (' +
-						pageQuote +
-						')'
+					content +
+					') does not include the expected content (' +
+					pageQuote +
+					')'
 				);
 			} );
 
-			step( "Can't view page title or content as non-logged in user", async function() {
-				await driver.manage().deleteAllCookies();
-				await driver.navigate().refresh();
+			it(
+				"Can't view page title or content as non-logged in user",
+				async () => {
+					await driver.manage().deleteAllCookies();
+					await driver.navigate().refresh();
 
-				const notFoundPage = await NotFoundPage.Expect( driver );
-				const displayed = await notFoundPage.displayed();
-				assert.strictEqual(
-					displayed,
-					true,
-					'Could not see the not found (404) page. Check that it is displayed'
-				);
-			} );
+					const notFoundPage = await NotFoundPage.Expect( driver );
+					const displayed = await notFoundPage.displayed();
+					assert.strictEqual(
+						displayed,
+						true,
+						'Could not see the not found (404) page. Check that it is displayed'
+					);
+				}
+			);
 		} else {
 			// Jetpack tests
-			step( 'Open published page', async function() {
+			it( 'Open published page', async () => {
 				const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
 				await postEditorToolbarComponent.viewPublishedPostOrPage();
 			} );
 
-			step( "Can't view page title or content as non-logged in user", async function() {
-				const notFoundPage = await NotFoundPage.Expect( driver );
-				const displayed = await notFoundPage.displayed();
-				assert.strictEqual(
-					displayed,
-					true,
-					'Could not see the not found (404) page. Check that it is displayed'
-				);
-			} );
+			it(
+				"Can't view page title or content as non-logged in user",
+				async () => {
+					const notFoundPage = await NotFoundPage.Expect( driver );
+					const displayed = await notFoundPage.displayed();
+					assert.strictEqual(
+						displayed,
+						true,
+						'Could not see the not found (404) page. Check that it is displayed'
+					);
+				}
+			);
 			//TODO: Add Jetpack SSO and verify content actually published
 		}
 	} );
 
-	describe( 'Password Protected Pages: @parallel @jetpack', function() {
+	describe( 'Password Protected Pages: @parallel @jetpack', () => {
 		const pageTitle = dataHelper.randomPhrase();
 		const pageQuote =
 			'If you don’t like something, change it. If you can’t change it, change the way you think about it.\n— Mary Engelbreit\n';
 		const postPassword = 'e2e' + new Date().getTime().toString();
 
-		describe( 'Publish a Password Protected Page', function() {
-			step( 'Can log in', async function() {
+		describe( 'Publish a Password Protected Page', () => {
+			it( 'Can log in', async () => {
 				const loginFlow = new LoginFlow( driver );
 				await loginFlow.loginAndStartNewPage();
 			} );
 
-			step( 'Can enter page title and content and set to password protected', async function() {
-				let editorPage = await EditorPage.Expect( driver );
-				await editorPage.enterTitle( pageTitle );
-				const postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
-				await postEditorSidebarComponent.setVisibilityToPasswordProtected( postPassword );
-				editorPage = await EditorPage.Expect( driver );
-				await editorPage.enterContent( pageQuote );
-				const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
-				await postEditorToolbarComponent.ensureSaved();
-			} );
+			it(
+				'Can enter page title and content and set to password protected',
+				async () => {
+					let editorPage = await EditorPage.Expect( driver );
+					await editorPage.enterTitle( pageTitle );
+					const postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
+					await postEditorSidebarComponent.setVisibilityToPasswordProtected( postPassword );
+					editorPage = await EditorPage.Expect( driver );
+					await editorPage.enterContent( pageQuote );
+					const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
+					await postEditorToolbarComponent.ensureSaved();
+				}
+			);
 
-			step( 'Can publish and view content', async function() {
+			it( 'Can publish and view content', async () => {
 				const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
 				await postEditorToolbarComponent.publishAndViewContent( { useConfirmStep: true } );
 			} );
 		} );
 
-		describe( 'As a logged in user', function() {
-			describe( 'With no password entered', function() {
-				step( 'Can view page title', async function() {
+		describe( 'As a logged in user', () => {
+			describe( 'With no password entered', () => {
+				it( 'Can view page title', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const actualPageTitle = await viewPagePage.pageTitle();
 					assert.strictEqual(
@@ -338,7 +350,7 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 					);
 				} );
 
-				step( 'Can see password field', async function() {
+				it( 'Can see password field', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const isPasswordProtected = await viewPagePage.isPasswordProtected();
 					assert.strictEqual(
@@ -348,28 +360,28 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 					);
 				} );
 
-				step( "Can't see content when no password is entered", async function() {
+				it( "Can't see content when no password is entered", async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const content = await viewPagePage.pageContent();
 					assert.strictEqual(
 						content.indexOf( pageQuote ) === -1,
 						true,
 						'The page content (' +
-							content +
-							') displays the expected content (' +
-							pageQuote +
-							') when it should be password protected.'
+						content +
+						') displays the expected content (' +
+						pageQuote +
+						') when it should be password protected.'
 					);
 				} );
 			} );
 
-			describe( 'With incorrect password entered', function() {
-				step( 'Enter incorrect password', async function() {
+			describe( 'With incorrect password entered', () => {
+				it( 'Enter incorrect password', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					await viewPagePage.enterPassword( 'password' );
 				} );
 
-				step( 'Can view page title', async function() {
+				it( 'Can view page title', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const actualPageTitle = await viewPagePage.pageTitle();
 					assert.strictEqual(
@@ -378,7 +390,7 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 					);
 				} );
 
-				step( 'Can see password field', async function() {
+				it( 'Can see password field', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const isPasswordProtected = await viewPagePage.isPasswordProtected();
 					assert.strictEqual(
@@ -388,28 +400,28 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 					);
 				} );
 
-				step( "Can't see content when incorrect password is entered", async function() {
+				it( "Can't see content when incorrect password is entered", async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const content = await viewPagePage.pageContent();
 					assert.strictEqual(
 						content.indexOf( pageQuote ) === -1,
 						true,
 						'The page content (' +
-							content +
-							') displays the expected content (' +
-							pageQuote +
-							') when it should be password protected.'
+						content +
+						') displays the expected content (' +
+						pageQuote +
+						') when it should be password protected.'
 					);
 				} );
 			} );
 
-			describe( 'With correct password entered', function() {
-				step( 'Enter correct password', async function() {
+			describe( 'With correct password entered', () => {
+				it( 'Enter correct password', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					await viewPagePage.enterPassword( postPassword );
 				} );
 
-				step( 'Can view page title', async function() {
+				it( 'Can view page title', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const actualPageTitle = await viewPagePage.pageTitle();
 					assert.strictEqual(
@@ -418,7 +430,7 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 					);
 				} );
 
-				step( "Can't see password field", async function() {
+				it( "Can't see password field", async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const isPasswordProtected = await viewPagePage.isPasswordProtected();
 					assert.strictEqual(
@@ -428,30 +440,30 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 					);
 				} );
 
-				step( 'Can see page content', async function() {
+				it( 'Can see page content', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const content = await viewPagePage.pageContent();
 					assert.strictEqual(
 						content.indexOf( pageQuote ) > -1,
 						true,
 						'The page content (' +
-							content +
-							') does not include the expected content (' +
-							pageQuote +
-							')'
+						content +
+						') does not include the expected content (' +
+						pageQuote +
+						')'
 					);
 				} );
 			} );
 		} );
 
-		describe( 'As a non-logged in user', function() {
-			step( 'Clear cookies (log out)', async function() {
+		describe( 'As a non-logged in user', () => {
+			it( 'Clear cookies (log out)', async () => {
 				await driver.manage().deleteAllCookies();
 				await driver.navigate().refresh();
 			} );
 
-			describe( 'With no password entered', function() {
-				step( 'Can view page title', async function() {
+			describe( 'With no password entered', () => {
+				it( 'Can view page title', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const actualPageTitle = await viewPagePage.pageTitle();
 					assert.strictEqual(
@@ -460,7 +472,7 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 					);
 				} );
 
-				step( 'Can see password field', async function() {
+				it( 'Can see password field', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const isPasswordProtected = await viewPagePage.isPasswordProtected();
 					assert.strictEqual(
@@ -470,28 +482,28 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 					);
 				} );
 
-				step( "Can't see content when no password is entered", async function() {
+				it( "Can't see content when no password is entered", async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const content = await viewPagePage.pageContent();
 					assert.strictEqual(
 						content.indexOf( pageQuote ) === -1,
 						true,
 						'The page content (' +
-							content +
-							') displays the expected content (' +
-							pageQuote +
-							') when it should be password protected.'
+						content +
+						') displays the expected content (' +
+						pageQuote +
+						') when it should be password protected.'
 					);
 				} );
 			} );
 
-			describe( 'With incorrect password entered', function() {
-				step( 'Enter incorrect password', async function() {
+			describe( 'With incorrect password entered', () => {
+				it( 'Enter incorrect password', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					await viewPagePage.enterPassword( 'password' );
 				} );
 
-				step( 'Can view page title', async function() {
+				it( 'Can view page title', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const actualPageTitle = await viewPagePage.pageTitle();
 					assert.strictEqual(
@@ -500,7 +512,7 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 					);
 				} );
 
-				step( 'Can see password field', async function() {
+				it( 'Can see password field', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const isPasswordProtected = await viewPagePage.isPasswordProtected();
 					assert.strictEqual(
@@ -510,28 +522,28 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 					);
 				} );
 
-				step( "Can't see content when incorrect password is entered", async function() {
+				it( "Can't see content when incorrect password is entered", async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const content = await viewPagePage.pageContent();
 					assert.strictEqual(
 						content.indexOf( pageQuote ) === -1,
 						true,
 						'The page content (' +
-							content +
-							') displays the expected content (' +
-							pageQuote +
-							') when it should be password protected.'
+						content +
+						') displays the expected content (' +
+						pageQuote +
+						') when it should be password protected.'
 					);
 				} );
 			} );
 
-			describe( 'With correct password entered', function() {
-				step( 'Enter correct password', async function() {
+			describe( 'With correct password entered', () => {
+				it( 'Enter correct password', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					await viewPagePage.enterPassword( postPassword );
 				} );
 
-				step( 'Can view page title', async function() {
+				it( 'Can view page title', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const actualPageTitle = await viewPagePage.pageTitle();
 					assert.strictEqual(
@@ -540,7 +552,7 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 					);
 				} );
 
-				step( "Can't see password field", async function() {
+				it( "Can't see password field", async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const isPasswordProtected = await viewPagePage.isPasswordProtected();
 					assert.strictEqual(
@@ -550,24 +562,24 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 					);
 				} );
 
-				step( 'Can see page content', async function() {
+				it( 'Can see page content', async () => {
 					const viewPagePage = await ViewPagePage.Expect( driver );
 					const content = await viewPagePage.pageContent();
 					assert.strictEqual(
 						content.indexOf( pageQuote ) > -1,
 						true,
 						'The page content (' +
-							content +
-							') does not include the expected content (' +
-							pageQuote +
-							')'
+						content +
+						') does not include the expected content (' +
+						pageQuote +
+						')'
 					);
 				} );
 			} );
 		} );
 	} );
 
-	describe( 'Insert a payment button into a page: @parallel @jetpack', function() {
+	describe( 'Insert a payment button into a page: @parallel @jetpack', () => {
 		const paymentButtonDetails = {
 			title: 'Button',
 			description: 'Description',
@@ -578,7 +590,7 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 			email: 'test@wordpress.com',
 		};
 
-		step( 'Can log in', async function() {
+		it( 'Can log in', async () => {
 			if ( host === 'WPCOM' ) {
 				return await new LoginFlow( driver ).loginAndStartNewPage();
 			}
@@ -586,7 +598,7 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 			await new LoginFlow( driver, 'jetpackUserPREMIUM' ).loginAndStartNewPage( jetpackUrl );
 		} );
 
-		step( 'Can insert the payment button', async function() {
+		it( 'Can insert the payment button', async () => {
 			const pageTitle = 'Payment Button Page: ' + dataHelper.randomPhrase();
 
 			const editorPage = await EditorPage.Expect( driver );
@@ -597,18 +609,21 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 			return assert.strictEqual( errorShown, false, 'There is an error shown on the editor page!' );
 		} );
 
-		step( 'Can see the payment button inserted into the visual editor', async function() {
-			const editorPage = await EditorPage.Expect( driver );
-			return await editorPage.ensurePaymentButtonDisplayedInPost();
-		} );
+		it(
+			'Can see the payment button inserted into the visual editor',
+			async () => {
+				const editorPage = await EditorPage.Expect( driver );
+				return await editorPage.ensurePaymentButtonDisplayedInPost();
+			}
+		);
 
-		step( 'Can publish and view content', async function() {
+		it( 'Can publish and view content', async () => {
 			const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
 			await postEditorToolbarComponent.ensureSaved();
 			await postEditorToolbarComponent.publishAndViewContent( { useConfirmStep: true } );
 		} );
 
-		step( 'Can see the payment button in our published page', async function() {
+		it( 'Can see the payment button in our published page', async () => {
 			const viewPagePage = await ViewPagePage.Expect( driver );
 			let displayed = await viewPagePage.paymentButtonDisplayed();
 			assert.strictEqual(
@@ -618,9 +633,9 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 			);
 		} );
 
-		step(
+		it(
 			'The payment button in our published page opens a new Paypal window for payment',
-			async function() {
+			async () => {
 				let numberOfOpenBrowserWindows = await driverHelper.numberOfOpenWindows( driver );
 				assert.strictEqual(
 					numberOfOpenBrowserWindows,
@@ -637,7 +652,7 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 					amountDisplayed,
 					`${ paymentButtonDetails.symbol }${ paymentButtonDetails.price } ${
 						paymentButtonDetails.currency
-					}`,
+						}`,
 					"The amount displayed on Paypal isn't correct"
 				);
 				await driverHelper.closeCurrentWindow( driver );
@@ -647,7 +662,7 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 			}
 		);
 
-		after( async function() {
+		afterAll( async function () {
 			await driverHelper.ensurePopupsClosed( driver );
 		} );
 	} );

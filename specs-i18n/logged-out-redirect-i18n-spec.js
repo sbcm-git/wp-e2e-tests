@@ -21,18 +21,21 @@ const locale = driverManager.currentLocale();
 
 let driver;
 
-before( function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 } );
 
-describe( `Logged out homepage redirect test @i18n (${ locale })`, function() {
-	this.timeout( mochaTimeOut );
+describe( `Logged out homepage redirect test @i18n (${ locale })`, () => {
+	jest.setTimeout( mochaTimeOut );
 
-	step( `should redirect to the correct url for wordpress.com (${ locale })`, async function() {
-		driver = await driverManager.startBrowser();
+	it(
+		`should redirect to the correct url for wordpress.com (${ locale })`,
+		async () => {
+			driver = await driverManager.startBrowser();
 
-		// No culture here implies 'en'
-		const wpHomePage = await WPHomePage.Visit( driver );
-		await wpHomePage.checkURL( locale );
-	} );
+			// No culture here implies 'en'
+			const wpHomePage = await WPHomePage.Visit( driver );
+			await wpHomePage.checkURL( locale );
+		}
+	);
 } );

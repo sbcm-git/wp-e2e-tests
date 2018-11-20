@@ -7,6 +7,12 @@
     "type": "git",
     "url": "https://github.com/Automattic/wp-e2e-tests.git"
   },
+  "jest": {
+    "verbose": true,
+    "testMatch": [
+      "**/specs*/*-spec.js"
+    ]
+  },
   "main": "greetings.js",
   "defaultTestArgs": "-g -s $BROWSERSIZE",
   "scripts": {
@@ -24,10 +30,11 @@
     }
   },
   "dependencies": {
-    "@babel/core": "^7.0.0-beta.44",
+    "@babel/core": "7.1.6",
     "@babel/preset-env": "^7.0.0-beta.44",
     "@babel/register": "^7.0.0-beta.44",
     "asana-phrase": "0.0.8",
+    "babel-core": "7.0.0-bridge.0",
     "babel-runtime": "^6.3.19",
     "chromedriver": "2.39.0",
     "concurrently": "^3.6.1",
@@ -43,6 +50,8 @@
     "grunt-cli": "^1.2.0",
     "grunt-concurrent": "^2.3.0",
     "grunt-shell": "^1.1.2",
+    "jest": "^23.6.0",
+    "jest-codemods": "^0.16.0",
     "junit-viewer": "4.9.6",
     "lodash": "^4.13.1",
     "mailosaur": "4.0.0",

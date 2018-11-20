@@ -66,33 +66,33 @@ const sandboxCookieValue = config.get( 'storeSandboxCookieValue' );
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
-	this.timeout( mochaTimeOut );
+describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, () => {
+	jest.setTimeout( mochaTimeOut );
 
-	describe( 'Sign up for a free WordPress.com site from the Jetpack new site page, and log in via a magic link @parallel @email', function() {
+	describe( 'Sign up for a free WordPress.com site from the Jetpack new site page, and log in via a magic link @parallel @email', () => {
 		const blogName = dataHelper.getNewBlogName();
 		const expectedBlogAddresses = dataHelper.getExpectedFreeAddresses( blogName );
 		const emailAddress = dataHelper.getEmailAddress( blogName, signupInboxId );
 		let magicLoginLink;
 
-		before( async function() {
+		beforeAll( async function () {
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step(
+		it(
 			'Can visit the Jetpack Add New Site page and choose "Create a shiny new WordPress.com site"',
-			async function() {
+			async () => {
 				const jetpackAddNewSitePage = await JetpackAddNewSitePage.Visit( driver );
 				await jetpackAddNewSitePage.createNewWordPressDotComSite();
 			}
 		);
 
-		step( 'Can see the account page and enter account details', async function() {
+		it( 'Can see the account page and enter account details', async () => {
 			const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
 			return await createYourAccountPage.enterAccountDetailsAndSubmit(
 				emailAddress,
@@ -101,15 +101,18 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			);
 		} );
 
-		step( 'Can see the "About" page, and enter some site information', async function() {
-			const aboutPage = await AboutPage.Expect( driver );
-			await aboutPage.enterSiteDetails( blogName, 'Electronics' );
-			return await aboutPage.submitForm();
-		} );
+		it(
+			'Can see the "About" page, and enter some site information',
+			async () => {
+				const aboutPage = await AboutPage.Expect( driver );
+				await aboutPage.enterSiteDetails( blogName, 'Electronics' );
+				return await aboutPage.submitForm();
+			}
+		);
 
-		step(
+		it(
 			'Can then see the domains page, and Can search for a blog name, can see and select a free .wordpress address in the results',
-			async function() {
+			async () => {
 				const findADomainComponent = await FindADomainComponent.Expect( driver );
 				await findADomainComponent.searchForBlogNameAndWaitForResults( blogName );
 				await findADomainComponent.checkAndRetryForFreeBlogAddresses(
@@ -125,19 +128,19 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can see the plans page and pick the free plan', async function() {
+		it( 'Can see the plans page and pick the free plan', async () => {
 			const pickAPlanPage = await PickAPlanPage.Expect( driver );
 			return await pickAPlanPage.selectFreePlan();
 		} );
 
-		step(
+		it(
 			'Can then see the sign up processing page which will finish automatically move along',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).continueAlong( blogName, passwordForTestAccounts );
 			}
 		);
 
-		step( 'Can then see the onboarding checklist', async function() {
+		it( 'Can then see the onboarding checklist', async () => {
 			const checklistPage = await ChecklistPage.Expect( driver );
 			const header = await checklistPage.headerExists();
 			const subheader = await checklistPage.subheaderExists();
@@ -147,13 +150,13 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return assert( subheader, 'The checklist subheader does not exist.' );
 		} );
 
-		step( 'Can log out and request a magic link', async function() {
+		it( 'Can log out and request a magic link', async () => {
 			await driverManager.ensureNotLoggedIn( driver );
 			const loginPage = await LoginPage.Visit( driver );
 			return await loginPage.requestMagicLink( emailAddress );
 		} );
 
-		step( 'Can see email containing magic link', async function() {
+		it( 'Can see email containing magic link', async () => {
 			const emailClient = new EmailClient( signupInboxId );
 			const validator = emails => emails.find( email => email.subject.includes( 'WordPress.com' ) );
 			let emails = await emailClient.pollEmailsByRecipient( emailAddress, validator );
@@ -173,32 +176,32 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			);
 		} );
 
-		step( 'Can visit the magic link and we should be logged in', async function() {
+		it( 'Can visit the magic link and we should be logged in', async () => {
 			await driver.get( magicLoginLink );
 			const magicLoginPage = await MagicLoginPage.Expect( driver );
 			await magicLoginPage.finishLogin();
 			return await ReaderPage.Expect( driver );
 		} );
 
-		step( 'Can delete our newly created account', async function() {
+		it( 'Can delete our newly created account', async () => {
 			return await new DeleteAccountFlow( driver ).deleteAccount( blogName );
 		} );
 	} );
 
-	describe( 'Sign up for a free site, see the onboarding checklist, activate email and can publish @parallel', function() {
+	describe( 'Sign up for a free site, see the onboarding checklist, activate email and can publish @parallel', () => {
 		const blogName = dataHelper.getNewBlogName();
 		const expectedBlogAddresses = dataHelper.getExpectedFreeAddresses( blogName );
 		const emailAddress = dataHelper.getEmailAddress( blogName, signupInboxId );
 
-		before( async function() {
+		beforeAll( async function () {
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'Can visit the start page', async function() {
+		it( 'Can visit the start page', async () => {
 			await StartPage.Visit( driver, StartPage.getStartURL( { culture: locale } ) );
 		} );
 
-		step( 'Can see the account page and enter account details', async function() {
+		it( 'Can see the account page and enter account details', async () => {
 			const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
 			return await createYourAccountPage.enterAccountDetailsAndSubmit(
 				emailAddress,
@@ -207,15 +210,18 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			);
 		} );
 
-		step( 'Can see the "About" page, and enter some site information', async function() {
-			const aboutPage = await AboutPage.Expect( driver );
-			await aboutPage.enterSiteDetails( blogName, 'Electronics' );
-			return await aboutPage.submitForm();
-		} );
+		it(
+			'Can see the "About" page, and enter some site information',
+			async () => {
+				const aboutPage = await AboutPage.Expect( driver );
+				await aboutPage.enterSiteDetails( blogName, 'Electronics' );
+				return await aboutPage.submitForm();
+			}
+		);
 
-		step(
+		it(
 			'Can then see the domains page, and Can search for a blog name, can see and select a free .wordpress address in the results',
-			async function() {
+			async () => {
 				const findADomainComponent = await FindADomainComponent.Expect( driver );
 				await findADomainComponent.searchForBlogNameAndWaitForResults( blogName );
 				await findADomainComponent.checkAndRetryForFreeBlogAddresses(
@@ -231,19 +237,19 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can see the plans page and pick the free plan', async function() {
+		it( 'Can see the plans page and pick the free plan', async () => {
 			const pickAPlanPage = await PickAPlanPage.Expect( driver );
 			return await pickAPlanPage.selectFreePlan();
 		} );
 
-		step(
+		it(
 			'Can then see the sign up processing page which will finish automatically move along',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).continueAlong( blogName, passwordForTestAccounts );
 			}
 		);
 
-		step( 'Can then see the onboarding checklist', async function() {
+		it( 'Can then see the onboarding checklist', async () => {
 			const checklistPage = await ChecklistPage.Expect( driver );
 			const header = await checklistPage.headerExists();
 			const subheader = await checklistPage.subheaderExists();
@@ -253,27 +259,27 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return assert( subheader, 'The checklist subheader does not exist.' );
 		} );
 
-		step( 'Can delete our newly created account', async function() {
+		it( 'Can delete our newly created account', async () => {
 			return await new DeleteAccountFlow( driver ).deleteAccount( blogName );
 		} );
 	} );
 
-	describe( 'Sign up for a non-blog site on a premium paid plan through main flow in USD currency using a coupon @parallel @visdiff', function() {
+	describe( 'Sign up for a non-blog site on a premium paid plan through main flow in USD currency using a coupon @parallel @visdiff', () => {
 		const blogName = dataHelper.getNewBlogName();
 		const expectedBlogAddresses = dataHelper.getExpectedFreeAddresses( blogName );
 		const emailAddress = dataHelper.getEmailAddress( blogName, signupInboxId );
 		const expectedCurrencySymbol = '$';
 		let originalCartAmount;
 
-		before( async function() {
+		beforeAll( async function () {
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'Can visit the start page', async function() {
+		it( 'Can visit the start page', async () => {
 			await StartPage.Visit( driver, StartPage.getStartURL( { culture: locale } ) );
 		} );
 
-		step( 'Can see the account page and enter account details', async function() {
+		it( 'Can see the account page and enter account details', async () => {
 			const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
 			return await createYourAccountPage.enterAccountDetailsAndSubmit(
 				emailAddress,
@@ -282,27 +288,30 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			);
 		} );
 
-		step( 'Can see the "About" page, and enter some site information', async function() {
-			const aboutPage = await AboutPage.Expect( driver );
-			return await aboutPage.enterSiteDetails( blogName, '', {
-				showcase: true,
-			} );
-		} );
+		it(
+			'Can see the "About" page, and enter some site information',
+			async () => {
+				const aboutPage = await AboutPage.Expect( driver );
+				return await aboutPage.enterSiteDetails( blogName, '', {
+					showcase: true,
+				} );
+			}
+		);
 
-		step( 'Can accept defaults for about page', async function() {
+		it( 'Can accept defaults for about page', async () => {
 			const aboutPage = await AboutPage.Expect( driver );
 			await aboutPage.submitForm();
 		} );
 
-		step( 'Can then see the domains page ', async function() {
+		it( 'Can then see the domains page ', async () => {
 			const findADomainComponent = await FindADomainComponent.Expect( driver );
 			let displayed = await findADomainComponent.displayed();
 			return assert.strictEqual( displayed, true, 'The choose a domain page is not displayed' );
 		} );
 
-		step(
+		it(
 			'Can search for a blog name, can see and select a free WordPress.com blog address in results',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).selectFreeWordPressDotComAddresss(
 					blogName,
 					expectedBlogAddresses
@@ -310,23 +319,26 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can then see the plans page and select the premium plan ', async function() {
-			const pickAPlanPage = await PickAPlanPage.Expect( driver );
-			let displayed = await pickAPlanPage.displayed();
-			assert.strictEqual( displayed, true, 'The pick a plan page is not displayed' );
-			return await pickAPlanPage.selectPremiumPlan();
-		} );
+		it(
+			'Can then see the plans page and select the premium plan ',
+			async () => {
+				const pickAPlanPage = await PickAPlanPage.Expect( driver );
+				let displayed = await pickAPlanPage.displayed();
+				assert.strictEqual( displayed, true, 'The pick a plan page is not displayed' );
+				return await pickAPlanPage.selectPremiumPlan();
+			}
+		);
 
-		step(
+		it(
 			'Can then see the sign up processing page which will automatically move along',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).continueAlong( blogName, passwordForTestAccounts );
 			}
 		);
 
-		step(
+		it(
 			'Can then see the secure payment page with the premium plan in the cart',
-			async function() {
+			async () => {
 				const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 				const premiumPlanInCart = await securePaymentComponent.containsPremiumPlan();
 				assert.strictEqual( premiumPlanInCart, true, "The cart doesn't contain the premium plan" );
@@ -339,9 +351,9 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step(
+		it(
 			'Can then see the secure payment page with the expected currency in the cart',
-			async function() {
+			async () => {
 				const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 				if ( driverManager.currentScreenSize() === 'desktop' ) {
 					const totalShown = await securePaymentComponent.cartTotalDisplayed();
@@ -359,7 +371,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can Correctly Apply Coupon discount', async function() {
+		it( 'Can Correctly Apply Coupon discount', async () => {
 			const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 			await securePaymentComponent.toggleCartSummary();
 			originalCartAmount = await securePaymentComponent.cartTotalAmount();
@@ -371,7 +383,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			assert.strictEqual( newCartAmount, expectedCartAmount, 'Coupon not applied properly' );
 		} );
 
-		step( 'Can Remove Coupon', async function() {
+		it( 'Can Remove Coupon', async () => {
 			const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 
 			await securePaymentComponent.removeCoupon();
@@ -381,29 +393,29 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 		} );
 	} );
 
-	describe( 'Sign up for a site on a premium paid plan through main flow in USD currency @parallel @canary', function() {
+	describe( 'Sign up for a site on a premium paid plan through main flow in USD currency @parallel @canary', () => {
 		const blogName = dataHelper.getNewBlogName();
 		const expectedBlogAddresses = dataHelper.getExpectedFreeAddresses( blogName );
 		const emailAddress = dataHelper.getEmailAddress( blogName, signupInboxId );
 		const currencyValue = 'USD';
 		const expectedCurrencySymbol = '$';
 
-		before( async function() {
+		beforeAll( async function () {
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'We can set the sandbox cookie for payments', async function() {
+		it( 'We can set the sandbox cookie for payments', async () => {
 			const wPHomePage = await WPHomePage.Visit( driver );
 			await wPHomePage.checkURL( locale );
 			await wPHomePage.setSandboxModeForPayments( sandboxCookieValue );
 			return await wPHomePage.setCurrencyForPayments( currencyValue );
 		} );
 
-		step( 'Can visit the start page', async function() {
+		it( 'Can visit the start page', async () => {
 			await StartPage.Visit( driver, StartPage.getStartURL( { culture: locale } ) );
 		} );
 
-		step( 'Can then enter account details', async function() {
+		it( 'Can then enter account details', async () => {
 			const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
 			return await createYourAccountPage.enterAccountDetailsAndSubmit(
 				emailAddress,
@@ -412,7 +424,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			);
 		} );
 
-		step( 'Can accept defaults for about page', async function() {
+		it( 'Can accept defaults for about page', async () => {
 			const aboutPage = await AboutPage.Expect( driver );
 			await aboutPage.enterSiteDetails( 'Step Back', 'Store Test Topic', { sell: true } );
 			await aboutPage.submitForm();
@@ -422,15 +434,15 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			await aboutPage.submitForm();
 		} );
 
-		step( 'Can then see the domains page ', async function() {
+		it( 'Can then see the domains page ', async () => {
 			const findADomainComponent = await FindADomainComponent.Expect( driver );
 			let displayed = await findADomainComponent.displayed();
 			return assert.strictEqual( displayed, true, 'The choose a domain page is not displayed' );
 		} );
 
-		step(
+		it(
 			'Can search for a blog name, can see and select a free WordPress.com blog address in results',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).selectFreeWordPressDotComAddresss(
 					blogName,
 					expectedBlogAddresses
@@ -438,23 +450,26 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can then see the plans page and select the premium plan ', async function() {
-			const pickAPlanPage = await PickAPlanPage.Expect( driver );
-			let displayed = await pickAPlanPage.displayed();
-			assert.strictEqual( displayed, true, 'The pick a plan page is not displayed' );
-			return await pickAPlanPage.selectPremiumPlan();
-		} );
+		it(
+			'Can then see the plans page and select the premium plan ',
+			async () => {
+				const pickAPlanPage = await PickAPlanPage.Expect( driver );
+				let displayed = await pickAPlanPage.displayed();
+				assert.strictEqual( displayed, true, 'The pick a plan page is not displayed' );
+				return await pickAPlanPage.selectPremiumPlan();
+			}
+		);
 
-		step(
+		it(
 			'Can then see the sign up processing page which will automatically move along',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).continueAlong( blogName, passwordForTestAccounts );
 			}
 		);
 
-		step(
+		it(
 			'Can then see the secure payment page with the premium plan in the cart',
-			async function() {
+			async () => {
 				const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 				const premiumPlanInCart = await securePaymentComponent.containsPremiumPlan();
 				assert.strictEqual( premiumPlanInCart, true, "The cart doesn't contain the premium plan" );
@@ -467,9 +482,9 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step(
+		it(
 			'Can then see the secure payment page with the expected currency in the cart',
-			async function() {
+			async () => {
 				const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 				if ( driverManager.currentScreenSize() === 'desktop' ) {
 					const totalShown = await securePaymentComponent.cartTotalDisplayed();
@@ -487,7 +502,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can enter and submit test payment details', async function() {
+		it( 'Can enter and submit test payment details', async () => {
 			const testCreditCardDetails = dataHelper.getTestCreditCardDetails();
 			const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 			await securePaymentComponent.enterTestCreditCardDetails( testCreditCardDetails );
@@ -495,7 +510,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return await securePaymentComponent.waitForPageToDisappear();
 		} );
 
-		step( 'Can then see the onboarding checklist', async function() {
+		it( 'Can then see the onboarding checklist', async () => {
 			const checklistPage = await ChecklistPage.Expect( driver );
 			const header = await checklistPage.headerExists();
 			const subheader = await checklistPage.subheaderExists();
@@ -505,16 +520,16 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return assert( subheader, 'The checklist subheader does not exist.' );
 		} );
 
-		step( 'Can delete the plan', async function() {
+		it( 'Can delete the plan', async () => {
 			return await new DeletePlanFlow( driver ).deletePlan( 'premium' );
 		} );
 
-		step( 'Can delete our newly created account', async function() {
+		it( 'Can delete our newly created account', async () => {
 			return await new DeleteAccountFlow( driver ).deleteAccount( blogName );
 		} );
 	} );
 
-	describe( 'Sign up for a site on a premium paid plan coming in via /create as premium flow in JPY currency @parallel', function() {
+	describe( 'Sign up for a site on a premium paid plan coming in via /create as premium flow in JPY currency @parallel', () => {
 		const blogName = dataHelper.getNewBlogName();
 		const expectedBlogAddresses = dataHelper.getExpectedFreeAddresses( blogName );
 		const emailAddress = dataHelper.getEmailAddress( blogName, signupInboxId );
@@ -522,49 +537,52 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 		const currencyValue = 'JPY';
 		const expectedCurrencySymbol = '¥';
 
-		before( async function() {
+		beforeAll( async function () {
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'We can set the sandbox cookie for payments', async function() {
+		it( 'We can set the sandbox cookie for payments', async () => {
 			const wPHomePage = await WPHomePage.Visit( driver );
 			await wPHomePage.checkURL( locale );
 			await wPHomePage.setSandboxModeForPayments( sandboxCookieValue );
 			return await wPHomePage.setCurrencyForPayments( currencyValue );
 		} );
 
-		step( 'Can visit the start page', async function() {
+		it( 'Can visit the start page', async () => {
 			await StartPage.Visit(
 				driver,
 				StartPage.getStartURL( { culture: locale, flow: 'premium' } )
 			);
 		} );
 
-		step( 'Can see the account details page and enter account details', async function() {
-			const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
-			return await createYourAccountPage.enterAccountDetailsAndSubmit(
-				emailAddress,
-				blogName,
-				passwordForTestAccounts
-			);
-		} );
+		it(
+			'Can see the account details page and enter account details',
+			async () => {
+				const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
+				return await createYourAccountPage.enterAccountDetailsAndSubmit(
+					emailAddress,
+					blogName,
+					passwordForTestAccounts
+				);
+			}
+		);
 
-		step( 'Can see the about page and accept defaults', async function() {
+		it( 'Can see the about page and accept defaults', async () => {
 			const aboutPage = await AboutPage.Expect( driver );
 			return await aboutPage.submitForm();
 		} );
 
-		step(
+		it(
 			'Can see the choose a theme page as the starting page, and select the first theme',
-			async function() {
+			async () => {
 				const chooseAThemePage = await ChooseAThemePage.Expect( driver );
 				return await chooseAThemePage.selectFirstTheme();
 			}
 		);
 
-		step(
+		it(
 			'Can then see the domains page and can search for a blog name, can see and select a free WordPress.com blog address in results',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).selectFreeWordPressDotComAddresss(
 					blogName,
 					expectedBlogAddresses
@@ -572,16 +590,16 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step(
+		it(
 			'Can then see the sign up processing page which will finish automatically move along',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).continueAlong( blogName, passwordForTestAccounts );
 			}
 		);
 
-		step(
+		it(
 			'Can then see the secure payment page with the expected currency in the cart',
-			async function() {
+			async () => {
 				const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 				if ( driverManager.currentScreenSize() === 'desktop' ) {
 					const totalShown = await securePaymentComponent.cartTotalDisplayed();
@@ -599,9 +617,9 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step(
+		it(
 			'Can then see the secure payment page with the expected products in the cart',
-			async function() {
+			async () => {
 				const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 				const premiumPlanInCart = await securePaymentComponent.containsPremiumPlan();
 				assert.strictEqual( premiumPlanInCart, true, "The cart doesn't contain the premium plan" );
@@ -614,7 +632,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can submit test payment details', async function() {
+		it( 'Can submit test payment details', async () => {
 			const testCreditCardDetails = dataHelper.getTestCreditCardDetails();
 			const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 			await securePaymentComponent.enterTestCreditCardDetails( testCreditCardDetails );
@@ -622,7 +640,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return await securePaymentComponent.waitForPageToDisappear();
 		} );
 
-		step( 'Can then see the onboarding checklist', async function() {
+		it( 'Can then see the onboarding checklist', async () => {
 			const checklistPage = await ChecklistPage.Expect( driver );
 			const header = await checklistPage.headerExists();
 			const subheader = await checklistPage.subheaderExists();
@@ -632,62 +650,68 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return assert( subheader, 'The checklist subheader does not exist.' );
 		} );
 
-		step( 'Can delete the plan', async function() {
+		it( 'Can delete the plan', async () => {
 			return await new DeletePlanFlow( driver ).deletePlan( 'premium' );
 		} );
 
-		step( 'Can delete our newly created account', async function() {
+		it( 'Can delete our newly created account', async () => {
 			return await new DeleteAccountFlow( driver ).deleteAccount( blogName );
 		} );
 	} );
 
-	describe( 'Sign up for a site on a personal paid plan coming in via /create as personal flow in GBP currency @parallel', function() {
+	describe( 'Sign up for a site on a personal paid plan coming in via /create as personal flow in GBP currency @parallel', () => {
 		const blogName = dataHelper.getNewBlogName();
 		const expectedBlogAddresses = dataHelper.getExpectedFreeAddresses( blogName );
 		const emailAddress = dataHelper.getEmailAddress( blogName, signupInboxId );
 		const currencyValue = 'GBP';
 		const expectedCurrencySymbol = '£';
 
-		before( async function() {
+		beforeAll( async function () {
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'We can set the sandbox cookie for payments', async function() {
+		it( 'We can set the sandbox cookie for payments', async () => {
 			const wPHomePage = await WPHomePage.Visit( driver );
 			await wPHomePage.checkURL( locale );
 			await wPHomePage.setSandboxModeForPayments( sandboxCookieValue );
 			return await wPHomePage.setCurrencyForPayments( currencyValue );
 		} );
 
-		step( 'Can visit the start page', async function() {
+		it( 'Can visit the start page', async () => {
 			await StartPage.Visit(
 				driver,
 				StartPage.getStartURL( { culture: locale, flow: 'personal' } )
 			);
 		} );
 
-		step( 'Can see the account details page and enter account details', async function() {
-			const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
-			return await createYourAccountPage.enterAccountDetailsAndSubmit(
-				emailAddress,
-				blogName,
-				passwordForTestAccounts
-			);
-		} );
+		it(
+			'Can see the account details page and enter account details',
+			async () => {
+				const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
+				return await createYourAccountPage.enterAccountDetailsAndSubmit(
+					emailAddress,
+					blogName,
+					passwordForTestAccounts
+				);
+			}
+		);
 
-		step( 'Can see the about page and accept defaults', async function() {
+		it( 'Can see the about page and accept defaults', async () => {
 			const aboutPage = await AboutPage.Expect( driver );
 			return await aboutPage.submitForm();
 		} );
 
-		step( 'Can see the choose a theme page, and select the first theme', async function() {
-			const chooseAThemePage = await ChooseAThemePage.Expect( driver );
-			return await chooseAThemePage.selectFirstTheme();
-		} );
+		it(
+			'Can see the choose a theme page, and select the first theme',
+			async () => {
+				const chooseAThemePage = await ChooseAThemePage.Expect( driver );
+				return await chooseAThemePage.selectFirstTheme();
+			}
+		);
 
-		step(
+		it(
 			'Can then see the domains page and can search for a blog name, can see and select a free WordPress.com blog address in results',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).selectFreeWordPressDotComAddresss(
 					blogName,
 					expectedBlogAddresses
@@ -695,16 +719,16 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step(
+		it(
 			'Can then see the sign up processing page which will finish automatically move along',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).continueAlong( blogName, passwordForTestAccounts );
 			}
 		);
 
-		step(
+		it(
 			'Can then see the secure payment page with the expected currency in the cart',
-			async function() {
+			async () => {
 				const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 				if ( driverManager.currentScreenSize() === 'desktop' ) {
 					const totalShown = await securePaymentComponent.cartTotalDisplayed();
@@ -722,9 +746,9 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step(
+		it(
 			'Can then see the secure payment page with the expected products in the cart',
-			async function() {
+			async () => {
 				const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 				const personalPlanInCart = await securePaymentComponent.containsPersonalPlan();
 				assert.strictEqual(
@@ -741,7 +765,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can submit test payment details', async function() {
+		it( 'Can submit test payment details', async () => {
 			const testCreditCardDetails = dataHelper.getTestCreditCardDetails();
 			const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 			await securePaymentComponent.enterTestCreditCardDetails( testCreditCardDetails );
@@ -749,7 +773,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return await securePaymentComponent.waitForPageToDisappear();
 		} );
 
-		step( 'Can then see the onboarding checklist', async function() {
+		it( 'Can then see the onboarding checklist', async () => {
 			const checklistPage = await ChecklistPage.Expect( driver );
 			const header = await checklistPage.headerExists();
 			const subheader = await checklistPage.subheaderExists();
@@ -759,16 +783,16 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return assert( subheader, 'The checklist subheader does not exist.' );
 		} );
 
-		step( 'Can delete the plan', async function() {
+		it( 'Can delete the plan', async () => {
 			return await new DeletePlanFlow( driver ).deletePlan( 'personal' );
 		} );
 
-		step( 'Can delete our newly created account', async function() {
+		it( 'Can delete our newly created account', async () => {
 			return await new DeleteAccountFlow( driver ).deleteAccount( blogName );
 		} );
 	} );
 
-	describe( 'Sign up for a domain only purchase coming in from wordpress.com/domains in EUR currency @parallel', function() {
+	describe( 'Sign up for a domain only purchase coming in from wordpress.com/domains in EUR currency @parallel', () => {
 		const siteName = dataHelper.getNewBlogName();
 		const expectedDomainName = `${ siteName }.live`;
 		const emailAddress = dataHelper.getEmailAddress( siteName, signupInboxId );
@@ -776,7 +800,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 		const currencyValue = 'EUR';
 		const expectedCurrencySymbol = '€';
 
-		before( async function() {
+		beforeAll( async function () {
 			if ( process.env.SKIP_DOMAIN_TESTS === 'true' ) {
 				await SlackNotifier.warn(
 					'Domains tests are currently disabled as SKIP_DOMAIN_TESTS is set to true',
@@ -786,18 +810,18 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		} );
 
-		before( async function() {
+		beforeAll( async function () {
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'We can visit set the sandbox cookie for payments', async function() {
+		it( 'We can visit set the sandbox cookie for payments', async () => {
 			const wPHomePage = await WPHomePage.Visit( driver );
 			await wPHomePage.checkURL( locale );
 			await wPHomePage.setSandboxModeForPayments( sandboxCookieValue );
 			return await wPHomePage.setCurrencyForPayments( currencyValue );
 		} );
 
-		step( 'Can visit the domains start page', async function() {
+		it( 'Can visit the domains start page', async () => {
 			await StartPage.Visit(
 				driver,
 				StartPage.getStartURL( {
@@ -808,12 +832,15 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			);
 		} );
 
-		step( 'Can select domain only from the domain first choice page', async function() {
-			const domainFirstPage = await DomainFirstPage.Expect( driver );
-			return await domainFirstPage.chooseJustBuyTheDomain();
-		} );
+		it(
+			'Can select domain only from the domain first choice page',
+			async () => {
+				const domainFirstPage = await DomainFirstPage.Expect( driver );
+				return await domainFirstPage.chooseJustBuyTheDomain();
+			}
+		);
 
-		step( 'Can then enter account details', async function() {
+		it( 'Can then enter account details', async () => {
 			const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
 			return await createYourAccountPage.enterAccountDetailsAndSubmit(
 				emailAddress,
@@ -822,16 +849,16 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			);
 		} );
 
-		step(
+		it(
 			'Can then see the sign up processing page which will finish automatically move along',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).continueAlong( siteName, passwordForTestAccounts );
 			}
 		);
 
-		step(
+		it(
 			'Can see checkout page, choose domain privacy option and enter registrar details',
-			async function() {
+			async () => {
 				let checkOutPage;
 				try {
 					checkOutPage = await CheckOutPage.Expect( driver );
@@ -852,9 +879,9 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step(
+		it(
 			'Can then see the secure payment page with the correct products in the cart',
-			async function() {
+			async () => {
 				const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 				const domainInCart = await securePaymentComponent.containsDotLiveDomain();
 				assert.strictEqual(
@@ -877,9 +904,9 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step(
+		it(
 			'Can then see the secure payment page with the expected currency in the cart',
-			async function() {
+			async () => {
 				const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 				if ( driverManager.currentScreenSize() === 'desktop' ) {
 					const totalShown = await securePaymentComponent.cartTotalDisplayed();
@@ -897,7 +924,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can enter/submit test payment details', async function() {
+		it( 'Can enter/submit test payment details', async () => {
 			const testCreditCardDetails = dataHelper.getTestCreditCardDetails();
 			const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 			await securePaymentComponent.enterTestCreditCardDetails( testCreditCardDetails );
@@ -906,9 +933,9 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return await securePaymentComponent.waitForPageToDisappear();
 		} );
 
-		step(
+		it(
 			'Can see the secure check out thank you page and click "go to my domain" button to see the domain only settings page',
-			async function() {
+			async () => {
 				const checkOutThankyouPage = await CheckOutThankyouPage.Expect( driver );
 				await checkOutThankyouPage.goToMyDomain();
 				const domainOnlySettingsPage = await DomainOnlySettingsPage.Expect( driver );
@@ -917,12 +944,12 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can open the sidebar', async function() {
+		it( 'Can open the sidebar', async () => {
 			const navBarComponent = await NavBarComponent.Expect( driver );
 			await navBarComponent.clickMySites();
 		} );
 
-		step( 'We should only one option - the settings option', async function() {
+		it( 'We should only one option - the settings option', async () => {
 			const sideBarComponent = await SideBarComponent.Expect( driver );
 			let numberMenuItems = await sideBarComponent.numberOfMenuItems();
 			assert.strictEqual(
@@ -934,7 +961,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return assert( exists, 'The settings menu option does not exist' );
 		} );
 
-		step( 'We can cancel the domain', async function() {
+		it( 'We can cancel the domain', async () => {
 			return ( async () => {
 				await ReaderPage.Visit( driver );
 				const navBarComponent = await NavBarComponent.Expect( driver );
@@ -969,7 +996,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 		} );
 	} );
 
-	describe( 'Sign up for a site on a business paid plan w/ domain name coming in via /create as business flow in CAD currency @parallel', function() {
+	describe( 'Sign up for a site on a business paid plan w/ domain name coming in via /create as business flow in CAD currency @parallel', () => {
 		const siteName = dataHelper.getNewBlogName();
 		const expectedDomainName = `${ siteName }.live`;
 		const emailAddress = dataHelper.getEmailAddress( siteName, signupInboxId );
@@ -977,7 +1004,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 		const currencyValue = 'CAD';
 		const expectedCurrencySymbol = 'C$';
 
-		before( async function() {
+		beforeAll( async function () {
 			if ( process.env.SKIP_DOMAIN_TESTS === 'true' ) {
 				await SlackNotifier.warn(
 					'Domains tests are currently disabled as SKIP_DOMAIN_TESTS is set to true',
@@ -987,25 +1014,25 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		} );
 
-		before( async function() {
+		beforeAll( async function () {
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'We can set the sandbox cookie for payments', async function() {
+		it( 'We can set the sandbox cookie for payments', async () => {
 			const wPHomePage = await WPHomePage.Visit( driver );
 			await wPHomePage.checkURL( locale );
 			await wPHomePage.setSandboxModeForPayments( sandboxCookieValue );
 			return await wPHomePage.setCurrencyForPayments( currencyValue );
 		} );
 
-		step( 'Can visit the start page', async function() {
+		it( 'Can visit the start page', async () => {
 			await StartPage.Visit(
 				driver,
 				StartPage.getStartURL( { culture: locale, flow: 'business' } )
 			);
 		} );
 
-		step( 'Can then enter account details and continue', async function() {
+		it( 'Can then enter account details and continue', async () => {
 			const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
 			return await createYourAccountPage.enterAccountDetailsAndSubmit(
 				emailAddress,
@@ -1014,22 +1041,22 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			);
 		} );
 
-		step( 'Can see the about page and accept defaults', async function() {
+		it( 'Can see the about page and accept defaults', async () => {
 			const aboutPage = await AboutPage.Expect( driver );
 			return await aboutPage.submitForm();
 		} );
 
-		step(
+		it(
 			'Can see the choose a theme page as the starting page, and select the first theme',
-			async function() {
+			async () => {
 				const chooseAThemePage = await ChooseAThemePage.Expect( driver );
 				return await chooseAThemePage.selectFirstTheme();
 			}
 		);
 
-		step(
+		it(
 			'Can then see the domains page, and can search for a blog name, can see and select a paid .live address in results ',
-			async function() {
+			async () => {
 				const findADomainComponent = await FindADomainComponent.Expect( driver );
 				await findADomainComponent.searchForBlogNameAndWaitForResults( expectedDomainName );
 				try {
@@ -1043,16 +1070,16 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step(
+		it(
 			'Can then see the sign up processing page which will finish automatically move along',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).continueAlong( siteName, passwordForTestAccounts );
 			}
 		);
 
-		step(
+		it(
 			'Can see checkout page, choose domain privacy option and enter registrar details',
-			async function() {
+			async () => {
 				const checkOutPage = await CheckOutPage.Expect( driver );
 				await checkOutPage.selectAddPrivacyProtectionCheckbox();
 				await checkOutPage.enterRegistarDetails( testDomainRegistarDetails );
@@ -1060,9 +1087,9 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step(
+		it(
 			'Can then see the secure payment page with the correct products in the cart',
-			async function() {
+			async () => {
 				const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 				const domainInCart = await securePaymentComponent.containsDotLiveDomain();
 				assert.strictEqual(
@@ -1091,9 +1118,9 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step(
+		it(
 			'Can then see the secure payment page with the expected currency in the cart',
-			async function() {
+			async () => {
 				const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 				if ( driverManager.currentScreenSize() === 'desktop' ) {
 					const totalShown = await securePaymentComponent.cartTotalDisplayed();
@@ -1111,7 +1138,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can enter/submit test payment details', async function() {
+		it( 'Can enter/submit test payment details', async () => {
 			const testCreditCardDetails = dataHelper.getTestCreditCardDetails();
 			const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 			await securePaymentComponent.enterTestCreditCardDetails( testCreditCardDetails );
@@ -1120,12 +1147,12 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return await securePaymentComponent.waitForPageToDisappear();
 		} );
 
-		step( 'Can see the gsuite upsell page', async function() {
+		it( 'Can see the gsuite upsell page', async () => {
 			const gSuiteUpsellPage = await GSuiteUpsellPage.Expect( driver );
 			return await gSuiteUpsellPage.declineEmail();
 		} );
 
-		step( 'Can then see the onboarding checklist', async function() {
+		it( 'Can then see the onboarding checklist', async () => {
 			const checklistPage = await ChecklistPage.Expect( driver );
 			const header = await checklistPage.headerExists();
 			const subheader = await checklistPage.subheaderExists();
@@ -1135,7 +1162,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return assert( subheader, 'The checklist subheader does not exist.' );
 		} );
 
-		step( 'Can cancel the domain', async function() {
+		it( 'Can cancel the domain', async () => {
 			return ( async () => {
 				const navBarComponent = await NavBarComponent.Expect( driver );
 				await navBarComponent.clickProfileLink();
@@ -1161,18 +1188,18 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 		} );
 	} );
 
-	describe( 'Basic sign up for a free site @parallel @email @ie11canary', function() {
+	describe( 'Basic sign up for a free site @parallel @email @ie11canary', () => {
 		const blogName = dataHelper.getNewBlogName();
 
-		before( async function() {
+		beforeAll( async function () {
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'Can visit the start page', async function() {
+		it( 'Can visit the start page', async () => {
 			await StartPage.Visit( driver, StartPage.getStartURL( { culture: locale } ) );
 		} );
 
-		step( 'Can then enter account details and continue', async function() {
+		it( 'Can then enter account details and continue', async () => {
 			const emailAddress = dataHelper.getEmailAddress( blogName, signupInboxId );
 			const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
 			return await createYourAccountPage.enterAccountDetailsAndSubmit(
@@ -1182,14 +1209,14 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			);
 		} );
 
-		step( 'Can see the about page and accept defaults', async function() {
+		it( 'Can see the about page and accept defaults', async () => {
 			const aboutPage = await AboutPage.Expect( driver );
 			return await aboutPage.submitForm();
 		} );
 
-		step(
+		it(
 			'Can then see the domains page, and Can search for a blog name, can see and select a free .wordpress address in the results',
-			async function() {
+			async () => {
 				const expectedBlogAddresses = dataHelper.getExpectedFreeAddresses( blogName );
 				const findADomainComponent = await FindADomainComponent.Expect( driver );
 				await findADomainComponent.searchForBlogNameAndWaitForResults( blogName );
@@ -1206,19 +1233,19 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can then see the plans page and pick the free plan', async function() {
+		it( 'Can then see the plans page and pick the free plan', async () => {
 			const pickAPlanPage = await PickAPlanPage.Expect( driver );
 			return await pickAPlanPage.selectFreePlan();
 		} );
 
-		step(
+		it(
 			'Can then see the sign up processing page which will finish automatically move along',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).continueAlong( blogName, passwordForTestAccounts );
 			}
 		);
 
-		step( 'Can then see the onboarding checklist', async function() {
+		it( 'Can then see the onboarding checklist', async () => {
 			const checklistPage = await ChecklistPage.Expect( driver );
 			const header = await checklistPage.headerExists();
 			const subheader = await checklistPage.subheaderExists();
@@ -1229,7 +1256,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 		} );
 	} );
 
-	describe( 'Sign up while purchasing premium theme in AUD currency @parallel @email', function() {
+	describe( 'Sign up while purchasing premium theme in AUD currency @parallel @email', () => {
 		const blogName = dataHelper.getNewBlogName();
 		const expectedBlogAddresses = dataHelper.getExpectedFreeAddresses( blogName );
 		const emailAddress = dataHelper.getEmailAddress( blogName, signupInboxId );
@@ -1237,18 +1264,18 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 		const expectedCurrencySymbol = 'A$';
 		let chosenThemeName = '';
 
-		before( async function() {
+		beforeAll( async function () {
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'We can set the sandbox cookie for payments', async function() {
+		it( 'We can set the sandbox cookie for payments', async () => {
 			const wPHomePage = await WPHomePage.Visit( driver );
 			await wPHomePage.checkURL( locale );
 			await wPHomePage.setSandboxModeForPayments( sandboxCookieValue );
 			return await wPHomePage.setCurrencyForPayments( currencyValue );
 		} );
 
-		step( 'Can see the themes page and select premium theme ', async function() {
+		it( 'Can see the themes page and select premium theme ', async () => {
 			const themesPage = await ThemesPage.Visit( driver, ThemesPage.getStartURL() );
 			await themesPage.waitUntilThemesLoaded();
 			await themesPage.setABTestControlGroupsInLocalStorage();
@@ -1257,14 +1284,14 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return await themesPage.selectNewTheme();
 		} );
 
-		step( 'Can pick theme design', async function() {
+		it( 'Can pick theme design', async () => {
 			const themeDetailPage = await ThemeDetailPage.Expect( driver );
 			return await themeDetailPage.pickThisDesign();
 		} );
 
-		step(
+		it(
 			'Can then see the domains page and can search for a blog name, can see and select a free WordPress.com blog address in results',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).selectFreeWordPressDotComAddresss(
 					blogName,
 					expectedBlogAddresses
@@ -1272,12 +1299,12 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can then see the plans page and pick the free plan', async function() {
+		it( 'Can then see the plans page and pick the free plan', async () => {
 			const pickAPlanPage = await PickAPlanPage.Expect( driver );
 			return await pickAPlanPage.selectFreePlan();
 		} );
 
-		step( 'Can then enter account details and continue', async function() {
+		it( 'Can then enter account details and continue', async () => {
 			const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
 			return await createYourAccountPage.enterAccountDetailsAndSubmit(
 				emailAddress,
@@ -1286,16 +1313,16 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			);
 		} );
 
-		step(
+		it(
 			'Can then see the sign up processing page which will finish automatically move along',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).continueAlong( blogName, passwordForTestAccounts );
 			}
 		);
 
-		step(
+		it(
 			'Can then see the secure payment page with the chosen theme in the cart',
-			async function() {
+			async () => {
 				const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 				let products = await securePaymentComponent.getProductsNames();
 				assert(
@@ -1311,9 +1338,9 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step(
+		it(
 			'Can then see the secure payment page with the expected currency in the cart',
-			async function() {
+			async () => {
 				const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 				if ( driverManager.currentScreenSize() === 'desktop' ) {
 					const totalShown = await securePaymentComponent.cartTotalDisplayed();
@@ -1331,7 +1358,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can submit test payment details', async function() {
+		it( 'Can submit test payment details', async () => {
 			const testCreditCardDetails = dataHelper.getTestCreditCardDetails();
 			const securePaymentComponent = await SecurePaymentComponent.Expect( driver );
 			await securePaymentComponent.enterTestCreditCardDetails( testCreditCardDetails );
@@ -1339,29 +1366,29 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return await securePaymentComponent.waitForPageToDisappear();
 		} );
 
-		step( 'Can see the theme thanks dialog', async function() {
+		it( 'Can see the theme thanks dialog', async () => {
 			const themeDialogComponent = await ThemeDialogComponent.Expect( driver );
 			await themeDialogComponent.goToThemeDetail();
 		} );
 
-		step( 'Can delete the plan', async function() {
+		it( 'Can delete the plan', async () => {
 			return await new DeletePlanFlow( driver ).deletePlan( 'theme' );
 		} );
 
-		step( 'Can delete our newly created account', async function() {
+		it( 'Can delete our newly created account', async () => {
 			return await new DeleteAccountFlow( driver ).deleteAccount( blogName );
 		} );
 	} );
 
-	describe( 'Sign up for free subdomain site @parallel', function() {
+	describe( 'Sign up for free subdomain site @parallel', () => {
 		const blogName = dataHelper.getNewBlogName();
 		const expectedDomainName = `${ blogName }.art.blog`;
 
-		before( async function() {
+		beforeAll( async function () {
 			await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'Can enter the subdomains flow and select design type', async function() {
+		it( 'Can enter the subdomains flow and select design type', async () => {
 			await StartPage.Visit(
 				driver,
 				StartPage.getStartURL( {
@@ -1374,17 +1401,17 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return await designTypePage.selectFirstDesignType();
 		} );
 
-		step(
+		it(
 			'Can see the choose a theme page as the starting page, and select the first theme',
-			async function() {
+			async () => {
 				const chooseAThemePage = await ChooseAThemePage.Expect( driver );
 				return await chooseAThemePage.selectFirstTheme();
 			}
 		);
 
-		step(
+		it(
 			'Can then see the domains page, and Can search for a blog name, can see and select a free .art.blog address in the results',
-			async function() {
+			async () => {
 				const findADomainComponent = await FindADomainComponent.Expect( driver );
 				await findADomainComponent.searchForBlogNameAndWaitForResults( blogName );
 				await findADomainComponent.checkAndRetryForFreeBlogAddresses(
@@ -1400,12 +1427,12 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can then see the plans page and pick the free plan', async function() {
+		it( 'Can then see the plans page and pick the free plan', async () => {
 			const pickAPlanPage = await PickAPlanPage.Expect( driver );
 			return await pickAPlanPage.selectFreePlan();
 		} );
 
-		step( 'Can then enter account details and continue', async function() {
+		it( 'Can then enter account details and continue', async () => {
 			const emailAddress = dataHelper.getEmailAddress( blogName, signupInboxId );
 			const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
 			return await createYourAccountPage.enterAccountDetailsAndSubmit(
@@ -1415,14 +1442,14 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			);
 		} );
 
-		step(
+		it(
 			'Can then see the sign up processing page which will finish automatically move along',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).continueAlong( blogName, passwordForTestAccounts );
 			}
 		);
 
-		step( 'Can then see the onboarding checklist', async function() {
+		it( 'Can then see the onboarding checklist', async () => {
 			const checklistPage = await ChecklistPage.Expect( driver );
 			const header = await checklistPage.headerExists();
 			const subheader = await checklistPage.subheaderExists();
@@ -1431,7 +1458,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return assert( subheader, 'The checklist subheader does not exist.' );
 		} );
 
-		step( 'Can delete site', async function() {
+		it( 'Can delete site', async () => {
 			const sidebarComponent = await SidebarComponent.Expect( driver );
 			await sidebarComponent.ensureSidebarMenuVisible();
 			await sidebarComponent.selectSettings();
@@ -1440,27 +1467,30 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 		} );
 	} );
 
-	describe( 'Sign up for an account only (no site) then add a site @parallel', function() {
+	describe( 'Sign up for an account only (no site) then add a site @parallel', () => {
 		const userName = dataHelper.getNewBlogName();
 		const blogName = dataHelper.getNewBlogName();
 		const expectedBlogAddresses = dataHelper.getExpectedFreeAddresses( blogName );
 
-		before( async function() {
+		beforeAll( async function () {
 			await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'Can enter the account flow and see the account details page', async function() {
-			await StartPage.Visit(
-				driver,
-				StartPage.getStartURL( {
-					culture: locale,
-					flow: 'account',
-				} )
-			);
-			await CreateYourAccountPage.Expect( driver );
-		} );
+		it(
+			'Can enter the account flow and see the account details page',
+			async () => {
+				await StartPage.Visit(
+					driver,
+					StartPage.getStartURL( {
+						culture: locale,
+						flow: 'account',
+					} )
+				);
+				await CreateYourAccountPage.Expect( driver );
+			}
+		);
 
-		step( 'Can then enter account details and continue', async function() {
+		it( 'Can then enter account details and continue', async () => {
 			const emailAddress = dataHelper.getEmailAddress( userName, signupInboxId );
 			const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
 			return await createYourAccountPage.enterAccountDetailsAndSubmit(
@@ -1470,16 +1500,16 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			);
 		} );
 
-		step(
+		it(
 			'Can then see the sign up processing page which will finish automatically move along',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).continueAlong( blogName, passwordForTestAccounts );
 			}
 		);
 
-		step(
+		it(
 			'We are then on the Reader page and have no sites - we click Create Site',
-			async function() {
+			async () => {
 				await ReaderPage.Expect( driver );
 				const navBarComponent = await NavBarComponent.Expect( driver );
 				await navBarComponent.clickMySites();
@@ -1488,15 +1518,18 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can see the "About" page, and enter some site information', async function() {
-			const aboutPage = await AboutPage.Expect( driver );
-			await aboutPage.enterSiteDetails( blogName, 'Electronics' );
-			return await aboutPage.submitForm();
-		} );
+		it(
+			'Can see the "About" page, and enter some site information',
+			async () => {
+				const aboutPage = await AboutPage.Expect( driver );
+				await aboutPage.enterSiteDetails( blogName, 'Electronics' );
+				return await aboutPage.submitForm();
+			}
+		);
 
-		step(
+		it(
 			'Can then see the domains page, and Can search for a blog name, can see and select a free .wordpress address in the results',
-			async function() {
+			async () => {
 				const findADomainComponent = await FindADomainComponent.Expect( driver );
 				await findADomainComponent.searchForBlogNameAndWaitForResults( blogName );
 				await findADomainComponent.checkAndRetryForFreeBlogAddresses(
@@ -1512,19 +1545,19 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step( 'Can see the plans page and pick the free plan', async function() {
+		it( 'Can see the plans page and pick the free plan', async () => {
 			const pickAPlanPage = await PickAPlanPage.Expect( driver );
 			return await pickAPlanPage.selectFreePlan();
 		} );
 
-		step(
+		it(
 			'Can then see the sign up processing page which will finish automatically move along',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).continueAlong( blogName, passwordForTestAccounts );
 			}
 		);
 
-		step( 'Can then see the onboarding checklist', async function() {
+		it( 'Can then see the onboarding checklist', async () => {
 			const checklistPage = await ChecklistPage.Expect( driver );
 			const header = await checklistPage.headerExists();
 			const subheader = await checklistPage.subheaderExists();
@@ -1534,37 +1567,40 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			return assert( subheader, 'The checklist subheader does not exist.' );
 		} );
 
-		step( 'Can delete our newly created account', async function() {
+		it( 'Can delete our newly created account', async () => {
 			return await new DeleteAccountFlow( driver ).deleteAccount( userName );
 		} );
 	} );
 
-	describe( 'Sign up for a Reader account @parallel', function() {
+	describe( 'Sign up for a Reader account @parallel', () => {
 		const userName = dataHelper.getNewBlogName();
 
-		before( async function() {
+		beforeAll( async function () {
 			await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'Can enter the reader flow and see the Reader landing page', async function() {
-			await StartPage.Visit(
-				driver,
-				StartPage.getStartURL( {
-					culture: locale,
-					flow: 'reader',
-				} )
-			);
-			return await ReaderLandingPage.Expect( driver );
-		} );
+		it(
+			'Can enter the reader flow and see the Reader landing page',
+			async () => {
+				await StartPage.Visit(
+					driver,
+					StartPage.getStartURL( {
+						culture: locale,
+						flow: 'reader',
+					} )
+				);
+				return await ReaderLandingPage.Expect( driver );
+			}
+		);
 
-		step( 'Can choose Start Using The Reader', async function() {
+		it( 'Can choose Start Using The Reader', async () => {
 			const readerLandingPage = await ReaderLandingPage.Expect( driver );
 			return await readerLandingPage.clickStartUsingTheReader();
 		} );
 
-		step(
+		it(
 			'Can see the account details page and enter account details and continue',
-			async function() {
+			async () => {
 				const emailAddress = dataHelper.getEmailAddress( userName, signupInboxId );
 				const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
 				return await createYourAccountPage.enterAccountDetailsAndSubmit(
@@ -1575,33 +1611,33 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		);
 
-		step(
+		it(
 			'Can then see the sign up processing page which will finish automatically move along',
-			async function() {
+			async () => {
 				return await new SignUpStep( driver ).continueAlong( userName, passwordForTestAccounts );
 			}
 		);
 
-		step( 'We are then on the Reader page', async function() {
+		it( 'We are then on the Reader page', async () => {
 			await ReaderPage.Expect( driver );
 		} );
 
-		step( 'Can delete our newly created account', async function() {
+		it( 'Can delete our newly created account', async () => {
 			return await new DeleteAccountFlow( driver ).deleteAccount( userName );
 		} );
 	} );
 
-	describe( 'Import a site while signing up @parallel', function() {
+	describe( 'Import a site while signing up @parallel', () => {
 		// Currently must use a Wix site to be importable through this flow.
 		const siteURL = 'https://hi6822.wixsite.com/eat-here-its-good';
 		const userName = dataHelper.getNewBlogName();
 		const emailAddress = dataHelper.getEmailAddress( userName, signupInboxId );
 
-		before( async function() {
+		beforeAll( async function () {
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'Can visit import in signup page and prefill url', async function() {
+		it( 'Can visit import in signup page and prefill url', async () => {
 			await StartPage.Visit(
 				driver,
 				StartPage.getStartURL( { culture: locale, flow: 'import', query: `url=${ siteURL }` } )
@@ -1617,7 +1653,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			);
 		} );
 
-		step( 'Can then enter a valid url of a site to import', async function() {
+		it( 'Can then enter a valid url of a site to import', async () => {
 			const importFromURLPage = await ImportFromURLPage.Expect( driver );
 
 			// Invalid URL.
@@ -1670,7 +1706,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			}
 		} );
 
-		step( 'Can then enter account details and continue', async function() {
+		it( 'Can then enter account details and continue', async () => {
 			const createYourAccountPage = await CreateYourAccountPage.Expect( driver );
 
 			return await createYourAccountPage.enterAccountDetailsAndSubmit(
@@ -1680,20 +1716,23 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			);
 		} );
 
-		step( 'Can then see the site importer pane and preview site to be imported', async function() {
-			const importPage = await ImportPage.Expect( driver );
+		it(
+			'Can then see the site importer pane and preview site to be imported',
+			async () => {
+				const importPage = await ImportPage.Expect( driver );
 
-			// Test that we have opened the correct importer and can see the preview.
-			await importPage.siteImporterInputPane();
-			await importPage.previewSiteToBeImported();
-		} );
+				// Test that we have opened the correct importer and can see the preview.
+				await importPage.siteImporterInputPane();
+				await importPage.previewSiteToBeImported();
+			}
+		);
 
-		step( 'Can then start an import', async function() {
+		it( 'Can then start an import', async () => {
 			const importPage = await ImportPage.Expect( driver );
 			await importPage.siteImporterCanStartImport();
 		} );
 
-		step( 'Can activate my account from an email', async function() {
+		it( 'Can activate my account from an email', async () => {
 			const emailClient = new EmailClient( signupInboxId );
 			const validator = emails => emails.find( email => email.subject.includes( 'Activate' ) );
 			let emails = await emailClient.pollEmailsByRecipient( emailAddress, validator );
@@ -1707,7 +1746,7 @@ describe( `[${ host }] Sign Up  (${ screenSize }, ${ locale })`, function() {
 			await driver.get( activationLink );
 		} );
 
-		step( 'Can delete our newly created account', async function() {
+		it( 'Can delete our newly created account', async () => {
 			return await new DeleteAccountFlow( driver ).deleteAccount( userName );
 		} );
 	} );

@@ -34,21 +34,21 @@ function writeJNCredentials( url, username, password ) {
 	} );
 }
 
-before( function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = driverManager.startBrowser();
 	return driverManager.clearCookiesAndDeleteLocalStorage( driver );
 } );
 
 describe( `[${ host }] Jurassic Ninja Connection: (${ screenSize }) @jetpack`, function() {
-	this.timeout( mochaTimeOut );
+	jest.setTimeout( mochaTimeOut );
 
-	step( 'Can connect from WP Admin', async function() {
+	it( 'Can connect from WP Admin', async function() {
 		this.jnFlow = new JetpackConnectFlow( driver, 'jetpackUserJN', 'jetpackMaster' );
 		return await this.jnFlow.connectFromWPAdmin();
 	} );
 
-	step( 'Can logout from WP admin', async function() {
+	it( 'Can logout from WP admin', async function() {
 		const wpDashboard = await WPAdminDashboardPage.Visit(
 			driver,
 			WPAdminDashboardPage.getUrl( this.jnFlow.url )
@@ -56,11 +56,11 @@ describe( `[${ host }] Jurassic Ninja Connection: (${ screenSize }) @jetpack`, f
 		return wpDashboard.logout();
 	} );
 
-	step( 'Can save JN credentials to file', async function() {
+	it( 'Can save JN credentials to file', async function() {
 		writeJNCredentials( this.jnFlow.url, 'demo', this.jnFlow.password );
 	} );
 
-	step( 'Can remove diconnected sites', async function() {
+	it( 'Can remove diconnected sites', async function() {
 		await this.jnFlow.removeSites();
 	} );
 } );

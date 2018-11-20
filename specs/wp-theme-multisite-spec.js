@@ -24,70 +24,79 @@ const host = dataHelper.getJetpackHost();
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-describe( `[${ host }] Themes: All sites (${ screenSize })`, function() {
-	describe( 'Preview a theme @parallel', function() {
-		this.timeout( mochaTimeOut );
+describe( `[${ host }] Themes: All sites (${ screenSize })`, () => {
+	let testContext;
 
-		step( 'Login and select themes', async function() {
-			this.themeSearchName = 'twenty';
-			this.expectedTheme = 'Twenty F';
+	beforeEach( () => {
+		testContext = {};
+	} );
 
-			this.loginFlow = new LoginFlow( driver, 'multiSiteUser' );
-			await this.loginFlow.loginAndSelectAllSites();
+	describe( 'Preview a theme @parallel', () => {
+		testContext.timeout( mochaTimeOut );
 
-			this.sidebarComponent = await SidebarComponent.Expect( driver );
-			await this.sidebarComponent.selectThemes();
+		it( 'Login and select themes', async () => {
+			testContext.themeSearchName = 'twenty';
+			testContext.expectedTheme = 'Twenty F';
+
+			testContext.loginFlow = new LoginFlow( driver, 'multiSiteUser' );
+			await testContext.loginFlow.loginAndSelectAllSites();
+
+			testContext.sidebarComponent = await SidebarComponent.Expect( driver );
+			await testContext.sidebarComponent.selectThemes();
 		} );
 
-		step( 'can search for free themes', async function() {
-			this.themesPage = await ThemesPage.Expect( driver );
-			await this.themesPage.waitUntilThemesLoaded();
-			await this.themesPage.showOnlyFreeThemes();
-			await this.themesPage.searchFor( this.themeSearchName );
+		it( 'can search for free themes', async () => {
+			testContext.themesPage = await ThemesPage.Expect( driver );
+			await testContext.themesPage.waitUntilThemesLoaded();
+			await testContext.themesPage.showOnlyFreeThemes();
+			await testContext.themesPage.searchFor( testContext.themeSearchName );
 
-			await this.themesPage.waitForThemeStartingWith( this.expectedTheme );
+			await testContext.themesPage.waitForThemeStartingWith( testContext.expectedTheme );
 		} );
 
-		describe( 'when a theme more button is clicked', function() {
-			step( 'click theme more button', async function() {
-				await this.themesPage.clickNewThemeMoreButton();
+		describe( 'when a theme more button is clicked', () => {
+			it( 'click theme more button', async () => {
+				await testContext.themesPage.clickNewThemeMoreButton();
 			} );
 
-			step( 'should show a menu', async function() {
-				let displayed = await this.themesPage.popOverMenuDisplayed();
+			it( 'should show a menu', async () => {
+				let displayed = await testContext.themesPage.popOverMenuDisplayed();
 				assert( displayed, 'Popover menu not displayed' );
 			} );
 
-			describe( 'when "Try & Customize" is clicked', function() {
-				step( 'click try and customize popover', async function() {
-					await this.themesPage.clickPopoverItem( 'Try & Customize' );
-					this.siteSelector = await SiteSelectorComponent.Expect( driver );
+			describe( 'when "Try & Customize" is clicked', () => {
+				it( 'click try and customize popover', async () => {
+					await testContext.themesPage.clickPopoverItem( 'Try & Customize' );
+					testContext.siteSelector = await SiteSelectorComponent.Expect( driver );
 				} );
 
-				step( 'should show the site selector', async function() {
-					let siteSelectorShown = await this.siteSelector.displayed();
+				it( 'should show the site selector', async () => {
+					let siteSelectorShown = await testContext.siteSelector.displayed();
 					return assert( siteSelectorShown, 'The site selector was not shown' );
 				} );
 
-				describe( 'when a site is selected, and Customize is clicked', function() {
-					step( 'select first site', async function() {
-						await this.siteSelector.selectFirstSite();
-						await this.siteSelector.ok();
+				describe( 'when a site is selected, and Customize is clicked', () => {
+					it( 'select first site', async () => {
+						await testContext.siteSelector.selectFirstSite();
+						await testContext.siteSelector.ok();
 					} );
 
-					step( 'should open the customizer with the selected site and theme', async function() {
-						this.customizerPage = await CustomizerPage.Expect( driver );
-						let url = await driver.getCurrentUrl();
-						assert( url.indexOf( this.siteSelector.selectedSiteDomain ) > -1, 'Wrong site domain' );
-						assert( url.indexOf( this.themeSearchName ) > -1, 'Wrong theme' );
-					} );
+					it(
+						'should open the customizer with the selected site and theme',
+						async () => {
+							testContext.customizerPage = await CustomizerPage.Expect( driver );
+							let url = await driver.getCurrentUrl();
+							assert( url.indexOf( testContext.siteSelector.selectedSiteDomain ) > -1, 'Wrong site domain' );
+							assert( url.indexOf( testContext.themeSearchName ) > -1, 'Wrong theme' );
+						}
+					);
 
-					after( async function() {
+					afterAll( async function () {
 						await this.customizerPage.close();
 					} );
 				} );
@@ -95,75 +104,78 @@ describe( `[${ host }] Themes: All sites (${ screenSize })`, function() {
 		} );
 	} );
 
-	describe( 'Activate a theme @parallel', function() {
-		this.timeout( mochaTimeOut );
+	describe( 'Activate a theme @parallel', () => {
+		testContext.timeout( mochaTimeOut );
 
-		step( 'Login and select themes', async function() {
-			this.themeSearchName = 'twenty';
-			this.expectedTheme = 'Twenty F';
+		it( 'Login and select themes', async () => {
+			testContext.themeSearchName = 'twenty';
+			testContext.expectedTheme = 'Twenty F';
 
-			this.loginFlow = new LoginFlow( driver, 'multiSiteUser' );
-			await this.loginFlow.loginAndSelectAllSites();
+			testContext.loginFlow = new LoginFlow( driver, 'multiSiteUser' );
+			await testContext.loginFlow.loginAndSelectAllSites();
 
-			this.sidebarComponent = await SidebarComponent.Expect( driver );
-			await this.sidebarComponent.selectThemes();
+			testContext.sidebarComponent = await SidebarComponent.Expect( driver );
+			await testContext.sidebarComponent.selectThemes();
 		} );
 
-		step( 'can search for free themes', async function() {
-			this.themesPage = await ThemesPage.Expect( driver );
-			await this.themesPage.waitUntilThemesLoaded();
-			await this.themesPage.showOnlyFreeThemes();
-			await this.themesPage.searchFor( this.themeSearchName );
-			await this.themesPage.waitForThemeStartingWith( this.expectedTheme );
+		it( 'can search for free themes', async () => {
+			testContext.themesPage = await ThemesPage.Expect( driver );
+			await testContext.themesPage.waitUntilThemesLoaded();
+			await testContext.themesPage.showOnlyFreeThemes();
+			await testContext.themesPage.searchFor( testContext.themeSearchName );
+			await testContext.themesPage.waitForThemeStartingWith( testContext.expectedTheme );
 
-			this.currentThemeName = await this.themesPage.getFirstThemeName();
+			testContext.currentThemeName = await testContext.themesPage.getFirstThemeName();
 		} );
 
-		describe( 'when a theme more button is clicked', function() {
-			step( 'click new theme more button', async function() {
-				await this.themesPage.clickNewThemeMoreButton();
+		describe( 'when a theme more button is clicked', () => {
+			it( 'click new theme more button', async () => {
+				await testContext.themesPage.clickNewThemeMoreButton();
 			} );
 
-			step( 'should show a menu', async function() {
-				let displayed = await this.themesPage.popOverMenuDisplayed();
+			it( 'should show a menu', async () => {
+				let displayed = await testContext.themesPage.popOverMenuDisplayed();
 				assert( displayed, 'Popover menu not displayed' );
 			} );
 
-			describe( 'when Activate is clicked', function() {
-				step( 'can click activate', async function() {
-					await this.themesPage.clickPopoverItem( 'Activate' );
-					return ( this.siteSelector = await SiteSelectorComponent.Expect( driver ) );
+			describe( 'when Activate is clicked', () => {
+				it( 'can click activate', async () => {
+					await testContext.themesPage.clickPopoverItem( 'Activate' );
+					return testContext.siteSelector = await SiteSelectorComponent.Expect( driver );
 				} );
 
-				step( 'shows the site selector', async function() {
-					let siteSelectorShown = await this.siteSelector.displayed();
+				it( 'shows the site selector', async () => {
+					let siteSelectorShown = await testContext.siteSelector.displayed();
 					return assert( siteSelectorShown, 'The site selector was not shown' );
 				} );
 
-				step( 'can select the first site sites', async function() {
-					await this.siteSelector.selectFirstSite();
-					return await this.siteSelector.ok();
+				it( 'can select the first site sites', async () => {
+					await testContext.siteSelector.selectFirstSite();
+					return await testContext.siteSelector.ok();
 				} );
 
-				describe( 'Successful activation dialog', function() {
-					step( 'should show the successful activation dialog', async function() {
+				describe( 'Successful activation dialog', () => {
+					it( 'should show the successful activation dialog', async () => {
 						const themeDialogComponent = await ThemeDialogComponent.Expect( driver );
 						return await themeDialogComponent.goToThemeDetail();
 					} );
 
-					step( 'should show the correct theme in the current theme bar', async function() {
-						this.themeDetailPage = await ThemeDetailPage.Expect( driver );
-						await this.themeDetailPage.goBackToAllThemes();
-						this.currentThemeComponent = await CurrentThemeComponent.Expect( driver );
-						let name = await this.currentThemeComponent.getThemeName();
-						return assert.strictEqual( name, this.currentThemeName );
-					} );
+					it(
+						'should show the correct theme in the current theme bar',
+						async () => {
+							testContext.themeDetailPage = await ThemeDetailPage.Expect( driver );
+							await testContext.themeDetailPage.goBackToAllThemes();
+							testContext.currentThemeComponent = await CurrentThemeComponent.Expect( driver );
+							let name = await testContext.currentThemeComponent.getThemeName();
+							return assert.strictEqual( name, testContext.currentThemeName );
+						}
+					);
 
-					step( 'should highlight the current theme as active', async function() {
-						await this.themesPage.showOnlyFreeThemes();
-						await this.themesPage.searchFor( this.themeSearchName );
-						let name = await this.themesPage.getActiveThemeName();
-						return assert.strictEqual( name, this.currentThemeName );
+					it( 'should highlight the current theme as active', async () => {
+						await testContext.themesPage.showOnlyFreeThemes();
+						await testContext.themesPage.searchFor( testContext.themeSearchName );
+						let name = await testContext.themesPage.getActiveThemeName();
+						return assert.strictEqual( name, testContext.currentThemeName );
 					} );
 				} );
 			} );

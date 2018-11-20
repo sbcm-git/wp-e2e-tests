@@ -34,21 +34,21 @@ const host = dataHelper.getJetpackHost();
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-describe( `[${ host }] Managing Domains: (${ screenSize }) @parallel`, function() {
-	this.timeout( mochaTimeOut );
+describe( `[${ host }] Managing Domains: (${ screenSize }) @parallel`, () => {
+	jest.setTimeout( mochaTimeOut );
 
-	describe( 'Adding a domain to an existing site ', function() {
+	describe( 'Adding a domain to an existing site ', () => {
 		const blogName = dataHelper.getNewBlogName();
 		const domainEmailAddress = dataHelper.getEmailAddress( blogName, domainsInboxId );
 		const expectedDomainName = blogName + '.com';
 		const testDomainRegistarDetails = dataHelper.getTestDomainRegistarDetails( domainEmailAddress );
 
-		before( async function() {
+		beforeAll( async function () {
 			if ( process.env.SKIP_DOMAIN_TESTS === 'true' ) {
 				await SlackNotifier.warn(
 					'Domains tests are currently disabled as SKIP_DOMAIN_TESTS is set to true',
@@ -58,17 +58,17 @@ describe( `[${ host }] Managing Domains: (${ screenSize }) @parallel`, function(
 			}
 		} );
 
-		step( 'Log In and Select Domains', async function() {
+		it( 'Log In and Select Domains', async () => {
 			return await new LoginFlow( driver ).loginAndSelectDomains();
 		} );
 
-		step( 'Can see the Domains page and choose add a domain', async function() {
+		it( 'Can see the Domains page and choose add a domain', async () => {
 			const domainsPage = await DomainsPage.Expect( driver );
 			await domainsPage.setABTestControlGroupsInLocalStorage();
 			return await domainsPage.clickAddDomain();
 		} );
 
-		step( 'Can see the domain search component', async function() {
+		it( 'Can see the domain search component', async () => {
 			let findADomainComponent;
 			try {
 				findADomainComponent = await FindADomainComponent.Expect( driver );
@@ -83,29 +83,35 @@ describe( `[${ host }] Managing Domains: (${ screenSize }) @parallel`, function(
 			return await findADomainComponent.waitForResults();
 		} );
 
-		step( 'Can search for a blog name', async function() {
+		it( 'Can search for a blog name', async () => {
 			const findADomainComponent = await FindADomainComponent.Expect( driver );
 			return await findADomainComponent.searchForBlogNameAndWaitForResults( blogName );
 		} );
 
-		step( 'Can select the .com search result and decline Google Apps for email', async function() {
-			const findADomainComponent = await FindADomainComponent.Expect( driver );
-			await findADomainComponent.selectDomainAddress( expectedDomainName );
-			return await findADomainComponent.declineGoogleApps();
-		} );
+		it(
+			'Can select the .com search result and decline Google Apps for email',
+			async () => {
+				const findADomainComponent = await FindADomainComponent.Expect( driver );
+				await findADomainComponent.selectDomainAddress( expectedDomainName );
+				return await findADomainComponent.declineGoogleApps();
+			}
+		);
 
-		step( 'Can see checkout page, choose privacy and enter registrar details', async function() {
-			const checkOutPage = await CheckOutPage.Expect( driver );
-			await checkOutPage.selectAddPrivacyProtectionCheckbox();
-			await checkOutPage.enterRegistarDetails( testDomainRegistarDetails );
-			return await checkOutPage.submitForm();
-		} );
+		it(
+			'Can see checkout page, choose privacy and enter registrar details',
+			async () => {
+				const checkOutPage = await CheckOutPage.Expect( driver );
+				await checkOutPage.selectAddPrivacyProtectionCheckbox();
+				await checkOutPage.enterRegistarDetails( testDomainRegistarDetails );
+				return await checkOutPage.submitForm();
+			}
+		);
 
-		step( 'Can then see secure payment component', async function() {
+		it( 'Can then see secure payment component', async () => {
 			return await SecurePaymentComponent.Expect( driver );
 		} );
 
-		step( 'Empty the cart', async function() {
+		it( 'Empty the cart', async () => {
 			await ReaderPage.Visit( driver );
 			const navBarComponent = await NavBarComponent.Expect( driver );
 			await navBarComponent.clickMySites();
@@ -118,10 +124,10 @@ describe( `[${ host }] Managing Domains: (${ screenSize }) @parallel`, function(
 		} );
 	} );
 
-	describe( 'Map a domain to an existing site @parallel', function() {
+	describe( 'Map a domain to an existing site @parallel', () => {
 		const blogName = 'go.com';
 
-		before( async function() {
+		beforeAll( async function () {
 			if ( process.env.SKIP_DOMAIN_TESTS === 'true' ) {
 				await SlackNotifier.warn(
 					'Domains tests are currently disabled as SKIP_DOMAIN_TESTS is set to true',
@@ -131,17 +137,17 @@ describe( `[${ host }] Managing Domains: (${ screenSize }) @parallel`, function(
 			}
 		} );
 
-		step( 'Log In and Select Domains', async function() {
+		it( 'Log In and Select Domains', async () => {
 			return await new LoginFlow( driver ).loginAndSelectDomains();
 		} );
 
-		step( 'Can see the Domains page and choose add a domain', async function() {
+		it( 'Can see the Domains page and choose add a domain', async () => {
 			const domainsPage = await DomainsPage.Expect( driver );
 			await domainsPage.setABTestControlGroupsInLocalStorage();
 			return await domainsPage.clickAddDomain();
 		} );
 
-		step( 'Can see the domain search component', async function() {
+		it( 'Can see the domain search component', async () => {
 			let findADomainComponent;
 			try {
 				findADomainComponent = await FindADomainComponent.Expect( driver );
@@ -156,39 +162,39 @@ describe( `[${ host }] Managing Domains: (${ screenSize }) @parallel`, function(
 			return await findADomainComponent.waitForResults();
 		} );
 
-		step( 'Can select to use an existing domain', async function() {
+		it( 'Can select to use an existing domain', async () => {
 			const findADomainComponent = await FindADomainComponent.Expect( driver );
 			return await findADomainComponent.selectUseOwnDomain();
 		} );
 
-		step( 'Can see use my own domain page', async function() {
+		it( 'Can see use my own domain page', async () => {
 			return await MyOwnDomainPage.Expect( driver );
 		} );
 
-		step( 'Can select to buy domain mapping', async function() {
+		it( 'Can select to buy domain mapping', async () => {
 			const myOwnDomainPage = await MyOwnDomainPage.Expect( driver );
 			return await myOwnDomainPage.selectBuyDomainMapping();
 		} );
 
-		step( 'Can see enter a domain component', async function() {
+		it( 'Can see enter a domain component', async () => {
 			return await MapADomainPage.Expect( driver );
 		} );
 
-		step( 'Can enter the domain name', async function() {
+		it( 'Can enter the domain name', async () => {
 			const enterADomainComponent = await EnterADomainComponent.Expect( driver );
 			return await enterADomainComponent.enterADomain( blogName );
 		} );
 
-		step( 'Can add domain to the cart', async function() {
+		it( 'Can add domain to the cart', async () => {
 			const enterADomainComponent = await EnterADomainComponent.Expect( driver );
 			return await enterADomainComponent.clickonAddButtonToAddDomainToTheCart();
 		} );
 
-		step( 'Can see checkout page', async function() {
+		it( 'Can see checkout page', async () => {
 			return await MapADomainCheckoutPage.Expect( driver );
 		} );
 
-		step( 'Empty the cart', async function() {
+		it( 'Empty the cart', async () => {
 			await ReaderPage.Visit( driver );
 			const navBarComponent = await NavBarComponent.Expect( driver );
 			await navBarComponent.clickMySites();
@@ -201,10 +207,10 @@ describe( `[${ host }] Managing Domains: (${ screenSize }) @parallel`, function(
 		} );
 	} );
 
-	describe( 'Transfer a domain to an existing site (partial) @parallel', function() {
+	describe( 'Transfer a domain to an existing site (partial) @parallel', () => {
 		const domain = 'automattic.com';
 
-		before( async function() {
+		beforeAll( async function () {
 			if ( process.env.SKIP_DOMAIN_TESTS === 'true' ) {
 				await SlackNotifier.warn(
 					'Domains tests are currently disabled as SKIP_DOMAIN_TESTS is set to true',
@@ -214,17 +220,17 @@ describe( `[${ host }] Managing Domains: (${ screenSize }) @parallel`, function(
 			}
 		} );
 
-		step( 'Log In and Select Domains', async function() {
+		it( 'Log In and Select Domains', async () => {
 			return await new LoginFlow( driver ).loginAndSelectDomains();
 		} );
 
-		step( 'Can see the Domains page and choose add a domain', async function() {
+		it( 'Can see the Domains page and choose add a domain', async () => {
 			const domainsPage = await DomainsPage.Expect( driver );
 			await domainsPage.setABTestControlGroupsInLocalStorage();
 			return await domainsPage.clickAddDomain();
 		} );
 
-		step( 'Can see the domain search component', async function() {
+		it( 'Can see the domain search component', async () => {
 			let findADomainComponent;
 			try {
 				findADomainComponent = await FindADomainComponent.Expect( driver );
@@ -239,35 +245,35 @@ describe( `[${ host }] Managing Domains: (${ screenSize }) @parallel`, function(
 			return await findADomainComponent.waitForResults();
 		} );
 
-		step( 'Can select to use an existing domain', async function() {
+		it( 'Can select to use an existing domain', async () => {
 			const findADomainComponent = await FindADomainComponent.Expect( driver );
 			return await findADomainComponent.selectUseOwnDomain();
 		} );
 
-		step( 'Can see use my own domain page', async function() {
+		it( 'Can see use my own domain page', async () => {
 			return await MyOwnDomainPage.Expect( driver );
 		} );
 
-		step( 'Can select to transfer a domain', async function() {
+		it( 'Can select to transfer a domain', async () => {
 			const myOwnDomainPage = await MyOwnDomainPage.Expect( driver );
 			return await myOwnDomainPage.selectTransferDomain();
 		} );
 
-		step( 'Can see the transfer my domain page', async function() {
+		it( 'Can see the transfer my domain page', async () => {
 			return await TransferDomainPage.Expect( driver );
 		} );
 
-		step( 'Can enter the domain name', async function() {
+		it( 'Can enter the domain name', async () => {
 			const transferDomainPage = await TransferDomainPage.Expect( driver );
 			return await transferDomainPage.enterADomain( domain );
 		} );
 
-		step( 'Click transfer domain button', async function() {
+		it( 'Click transfer domain button', async () => {
 			const transferDomainPage = await TransferDomainPage.Expect( driver );
 			return await transferDomainPage.clickTransferDomain();
 		} );
 
-		step( 'Can see the transfer precheck page', async function() {
+		it( 'Can see the transfer precheck page', async () => {
 			return await TransferDomainPrecheckPage.Expect( driver );
 		} );
 	} );

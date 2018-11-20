@@ -22,24 +22,24 @@ const host = dataHelper.getJetpackHost();
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-describe( `[${ host }] Notifications: (${ screenSize }) @parallel`, function() {
-	this.timeout( mochaTimeOut );
+describe( `[${ host }] Notifications: (${ screenSize }) @parallel`, () => {
+	jest.setTimeout( mochaTimeOut );
 
 	const commentingUser = dataHelper.getAccountConfig( 'commentingUser' )[ 0 ];
 	const comment = dataHelper.randomPhrase() + ' TBD';
 	let commentedPostTitle;
 
-	step( 'Can log in as commenting user', async function() {
+	it( 'Can log in as commenting user', async () => {
 		const loginFlow = new LoginFlow( driver, 'commentingUser' );
 		return await loginFlow.login();
 	} );
 
-	step( 'Can view the first post', async function() {
+	it( 'Can view the first post', async () => {
 		const testSiteForInvitationsURL = `https://${ dataHelper.configGet(
 			'testSiteForNotifications'
 		) }`;
@@ -47,17 +47,17 @@ describe( `[${ host }] Notifications: (${ screenSize }) @parallel`, function() {
 		return await viewBlogPage.viewFirstPost();
 	} );
 
-	step( 'Can see the first post page and capture the title', async function() {
+	it( 'Can see the first post page and capture the title', async () => {
 		const viewPostPage = await ViewPostPage.Expect( driver );
 		commentedPostTitle = await viewPostPage.postTitle();
 	} );
 
-	step( 'Can leave a comment', async function() {
+	it( 'Can leave a comment', async () => {
 		const viewPostPage = await ViewPostPage.Expect( driver );
 		return await viewPostPage.leaveAComment( comment );
 	} );
 
-	step( 'Can see the comment', async function() {
+	it( 'Can see the comment', async () => {
 		const viewPostPage = await ViewPostPage.Expect( driver );
 		const shown = await viewPostPage.commentEventuallyShown( comment );
 		if ( shown === false ) {
@@ -67,19 +67,19 @@ describe( `[${ host }] Notifications: (${ screenSize }) @parallel`, function() {
 		}
 	} );
 
-	step( 'Can log in as notifications user', async function() {
+	it( 'Can log in as notifications user', async () => {
 		const loginFlow = new LoginFlow( driver, 'notificationsUser' );
 		return await loginFlow.login();
 	} );
 
-	step( 'Can open notifications tab with keyboard shortcut', async function() {
+	it( 'Can open notifications tab with keyboard shortcut', async () => {
 		const navBarComponent = await NavBarComponent.Expect( driver );
 		await navBarComponent.openNotificationsShortcut();
 		const present = await navBarComponent.confirmNotificationsOpen();
 		return assert( present, 'Notifications tab is not open' );
 	} );
 
-	step( 'Can see the notification of the comment', async function() {
+	it( 'Can see the notification of the comment', async () => {
 		const expectedContent = `${ commentingUser } commented on ${ commentedPostTitle }\n${ comment }`;
 		const navBarComponent = await NavBarComponent.Expect( driver );
 		await navBarComponent.openNotifications();
@@ -93,9 +93,9 @@ describe( `[${ host }] Notifications: (${ screenSize }) @parallel`, function() {
 		);
 	} );
 
-	step(
+	it(
 		'Can delete the comment (and wait for UNDO grace period so it is actually deleted)',
-		async function() {
+		async () => {
 			const notificationsComponent = await NotificationsComponent.Expect( driver );
 			await notificationsComponent.selectCommentByText( comment );
 			await notificationsComponent.trashComment();

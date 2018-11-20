@@ -31,70 +31,70 @@ const host = dataHelper.getJetpackHost();
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-describe( `[${ host }] Auth Screen Canary: (${ screenSize }) @parallel @safaricanary`, function() {
-	this.timeout( mochaTimeOut );
+describe( `[${ host }] Auth Screen Canary: (${ screenSize }) @parallel @safaricanary`, () => {
+	jest.setTimeout( mochaTimeOut );
 
-	describe( 'Loading the log-in screen', function() {
-		before( async function() {
+	describe( 'Loading the log-in screen', () => {
+		beforeAll( async function() {
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'Can see the log in screen', async function() {
+		it( 'Can see the log in screen', async () => {
 			await LoginPage.Visit( driver, LoginPage.getLoginURL() );
 		} );
 	} );
 } );
 
-describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, function() {
-	this.timeout( mochaTimeOut );
+describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, () => {
+	jest.setTimeout( mochaTimeOut );
 
-	describe( 'Logging In and Out:', function() {
-		before( async function() {
+	describe( 'Logging In and Out:', () => {
+		beforeAll( async function () {
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		describe( 'Can Log In', function() {
-			step( 'Can log in', async function() {
+		describe( 'Can Log In', () => {
+			it( 'Can log in', async () => {
 				let loginFlow = new LoginFlow( driver );
 				await loginFlow.login();
 			} );
 
-			step( 'Can see Reader Page after logging in', async function() {
+			it( 'Can see Reader Page after logging in', async () => {
 				return await ReaderPage.Expect( driver );
 			} );
 		} );
 
 		// Test Jetpack SSO
 		if ( host !== 'WPCOM' ) {
-			describe( 'Can Log via Jetpack SSO', function() {
-				step( 'Can log into site via Jetpack SSO', async function() {
+			describe( 'Can Log via Jetpack SSO', () => {
+				it( 'Can log into site via Jetpack SSO', async () => {
 					const loginPage = await WPAdminLogonPage.Visit( driver, dataHelper.getJetpackSiteName() );
 					return await loginPage.logonSSO();
 				} );
 
-				step( 'Can return to Reader', async function() {
+				it( 'Can return to Reader', async () => {
 					return await ReaderPage.Visit( driver );
 				} );
 			} );
 		}
 
-		describe( 'Can Log Out', function() {
-			step( 'Can view profile to log out', async function() {
+		describe( 'Can Log Out', () => {
+			it( 'Can view profile to log out', async () => {
 				let navbarComponent = await NavBarComponent.Expect( driver );
 				await navbarComponent.clickProfileLink();
 			} );
 
-			step( 'Can logout from profile page', async function() {
+			it( 'Can logout from profile page', async () => {
 				const profilePage = await ProfilePage.Expect( driver );
 				await profilePage.clickSignOut();
 			} );
 
-			step( 'Can see wordpress.com home when after logging out', async function() {
+			it( 'Can see wordpress.com home when after logging out', async () => {
 				return await LoggedOutMasterbarComponent.Expect( driver );
 			} );
 		} );
@@ -124,7 +124,7 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	// 			} );
 	// 		} );
 	//
-	// 		step( 'Should be on the /log-in/sms page', function() {
+	// 		it( 'Should be on the /log-in/sms page', function() {
 	// 			return twoFALoginPage.displayed().then( function() {
 	// 				return driver.getCurrentUrl().then( ( urlDisplayed ) => {
 	// 					assert( urlDisplayed.indexOf( '/log-in/sms' ) !== -1, 'The 2fa sms page is not displayed after log in' );
@@ -132,7 +132,7 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	// 			} );
 	// 		} );
 	//
-	// 		step( 'Enter the 2fa code and we\'re logged in', function() {
+	// 		it( 'Enter the 2fa code and we\'re logged in', function() {
 	// 			return twoFALoginPage.enter2FACode( twoFACode );
 	// 		} );
 	// 	} );
@@ -150,7 +150,7 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	// 			} );
 	// 		} );
 	//
-	// 		step( 'Should be on the /log-in/push page', function() {
+	// 		it( 'Should be on the /log-in/push page', function() {
 	// 			return twoFALoginPage.displayed().then( function() {
 	// 				return driver.getCurrentUrl().then( ( urlDisplayed ) => {
 	// 					assert( urlDisplayed.indexOf( '/log-in/push' ) !== -1, 'The 2fa push page is not displayed after log in' );
@@ -158,7 +158,7 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	// 			} );
 	// 		} );
 	//
-	// 		step( 'Approve push 2fa token and we\'re logged in', function( done ) {
+	// 		it( 'Approve push 2fa token and we\'re logged in', function( done ) {
 	// 			subscribeToPush( loginFlow.account.pushConfig, pushToken => {
 	// 				approvePushToken( pushToken, loginFlow.account.bearerToken ).then( () => {
 	// 					const readerPage = new ReaderPage( driver );
@@ -184,7 +184,7 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	// 			} );
 	// 		} );
 	//
-	// 		step( 'Should be on the /log-in/authenticator page', function() {
+	// 		it( 'Should be on the /log-in/authenticator page', function() {
 	// 			return twoFALoginPage.displayed().then( function() {
 	// 				return driver.getCurrentUrl().then( ( urlDisplayed ) => {
 	// 					assert( urlDisplayed.indexOf( '/log-in/authenticator' ) !== -1, 'The 2fa authenticator page is not displayed after log in' );
@@ -192,7 +192,7 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	// 			} );
 	// 		} );
 	//
-	// 		step( 'Enter the 2fa code and we\'re logged in', function() {
+	// 		it( 'Enter the 2fa code and we\'re logged in', function() {
 	// 			const twoFACode = speakeasy.totp( {
 	// 				secret: loginFlow.account['2faOTPsecret'],
 	// 				encoding: 'base32'
@@ -216,7 +216,7 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	// 				return loginFlow.login();
 	// 			} );
 	//
-	// 			step( 'Can find the magic link in the email received', function() {
+	// 			it( 'Can find the magic link in the email received', function() {
 	// 				return emailClient.pollEmailsByRecipient( loginFlow.account.email ).then( function( emails ) {
 	// 					magicLinkEmail = emails.find( email => email.subject.indexOf( 'WordPress.com' ) > -1 );
 	// 					assert( magicLinkEmail !== undefined, 'Could not find the magic login email' );
@@ -228,7 +228,7 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	//
 	// 			describe( 'Can use the magic link to log in', function() {
 	// 				let magicLoginPage;
-	// 				step( 'Visit the magic link and we\'re logged in', function() {
+	// 				it( 'Visit the magic link and we\'re logged in', function() {
 	// 					driver.get( magicLoginLink );
 	// 					magicLoginPage = new MagicLoginPage( driver );
 	// 					magicLoginPage.finishLogin();
@@ -269,7 +269,7 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	// 				return loginFlow.login();
 	// 			} );
 	//
-	// 			step( 'Can find the magic link in the email received', function() {
+	// 			it( 'Can find the magic link in the email received', function() {
 	// 				return emailClient.pollEmailsByRecipient( loginFlow.account.email ).then( function( emails ) {
 	// 					magicLinkEmail = emails.find( email => email.subject.indexOf( 'WordPress.com' ) > -1 );
 	// 					assert( magicLinkEmail !== undefined, 'Could not find the magic login email' );
@@ -301,7 +301,7 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	// 					} );
 	// 				} );
 	//
-	// 				step( 'Should be on the /log-in/sms page', function() {
+	// 				it( 'Should be on the /log-in/sms page', function() {
 	// 					return twoFALoginPage.displayed().then( function() {
 	// 						return driver.getCurrentUrl().then( ( urlDisplayed ) => {
 	// 							assert( urlDisplayed.indexOf( '/log-in/sms' ) !== -1, 'The 2fa sms page is not displayed after log in' );
@@ -309,7 +309,7 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	// 					} );
 	// 				} );
 	//
-	// 				step( 'Enter the 2fa code and we\'re logged in', function() {
+	// 				it( 'Enter the 2fa code and we\'re logged in', function() {
 	// 					return twoFALoginPage.enter2FACode( twoFACode );
 	// 				} );
 	//
@@ -344,7 +344,7 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	// 				return loginFlow.login();
 	// 			} );
 	//
-	// 			step( 'Can find the magic link in the email received', function() {
+	// 			it( 'Can find the magic link in the email received', function() {
 	// 				return emailClient.pollEmailsByRecipient( loginFlow.account.email ).then( function( emails ) {
 	// 					magicLinkEmail = emails.find( email => email.subject.indexOf( 'WordPress.com' ) > -1 );
 	// 					assert( magicLinkEmail !== undefined, 'Could not find the magic login email' );
@@ -364,7 +364,7 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	// 					return twoFALoginPage.use2FAMethod( 'otp' );
 	// 				} );
 	//
-	// 				step( 'Should be on the /log-in/authenticator page', function() {
+	// 				it( 'Should be on the /log-in/authenticator page', function() {
 	// 					return twoFALoginPage.displayed().then( function() {
 	// 						return driver.getCurrentUrl().then( ( urlDisplayed ) => {
 	// 							assert( urlDisplayed.indexOf( '/log-in/authenticator' ) !== -1, 'The 2fa authenticator page is not displayed after log in' );
@@ -372,7 +372,7 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	// 					} );
 	// 				} );
 	//
-	// 				step( 'Enter the 2fa code and we\'re logged in', function() {
+	// 				it( 'Enter the 2fa code and we\'re logged in', function() {
 	// 					const twoFACode = speakeasy.totp( {
 	// 						secret: loginFlow.account['2faOTPsecret'],
 	// 						encoding: 'base32'
@@ -398,14 +398,14 @@ describe( `[${ host }] Authentication: (${ screenSize }) @parallel @jetpack`, fu
 	// }
 } );
 
-describe( `[${ host }] User Agent: (${ screenSize }) @parallel @jetpack`, function() {
-	this.timeout( mochaTimeOut );
+describe( `[${ host }] User Agent: (${ screenSize }) @parallel @jetpack`, () => {
+	jest.setTimeout( mochaTimeOut );
 
-	before( async function() {
+	beforeAll( async function () {
 		await driverManager.ensureNotLoggedIn( driver );
 	} );
 
-	step( 'Can see the correct user agent set', async function() {
+	it( 'Can see the correct user agent set', async () => {
 		await WPHomePage.Visit( driver );
 		const userAgent = await driver.executeScript( 'return navigator.userAgent;' );
 		assert(

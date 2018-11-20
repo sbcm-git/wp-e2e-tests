@@ -21,32 +21,32 @@ const host = dataHelper.getJetpackHost();
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-describe( `[${ host }] Plans: (${ screenSize }) @parallel @jetpack`, function() {
-	this.timeout( mochaTimeOut );
+describe( `[${ host }] Plans: (${ screenSize }) @parallel @jetpack`, () => {
+	jest.setTimeout( mochaTimeOut );
 
-	describe( 'Comparing Plans:', function() {
-		step( 'Login and Select My Site', async function() {
+	describe( 'Comparing Plans:', () => {
+		it( 'Login and Select My Site', async () => {
 			const loginFlow = new LoginFlow( driver );
 			return await loginFlow.loginAndSelectMySite();
 		} );
 
-		step( 'Can Select Plans', async function() {
+		it( 'Can Select Plans', async () => {
 			const statsPage = await StatsPage.Expect( driver );
 			await statsPage.waitForPage();
 			const sideBarComponent = await SidebarComponent.Expect( driver );
 			return await sideBarComponent.selectPlan();
 		} );
 
-		step( 'Can See Plans', async function() {
+		it( 'Can See Plans', async () => {
 			return await PlansPage.Expect( driver );
 		} );
 
-		step( 'Can Compare Plans', async function() {
+		it( 'Can Compare Plans', async () => {
 			const plansPage = await PlansPage.Expect( driver );
 			if ( host === 'WPCOM' ) {
 				await plansPage.openPlansTab();
@@ -59,7 +59,7 @@ describe( `[${ host }] Plans: (${ screenSize }) @parallel @jetpack`, function() 
 		} );
 
 		if ( host === 'WPCOM' ) {
-			step( 'Can Verify Current Plan', async function() {
+			it( 'Can Verify Current Plan', async () => {
 				const planName = 'premium';
 				const plansPage = await PlansPage.Expect( driver );
 				const present = await plansPage.confirmCurrentPlan( planName );
@@ -68,26 +68,26 @@ describe( `[${ host }] Plans: (${ screenSize }) @parallel @jetpack`, function() 
 		}
 	} );
 
-	describe( 'Viewing a specific plan with coupon:', function() {
+	describe( 'Viewing a specific plan with coupon:', () => {
 		let originalCartAmount, loginFlow;
 
-		before( async function() {
+		beforeAll( async function () {
 			return await driverManager.ensureNotLoggedIn( driver );
 		} );
 
-		step( 'Login and Select My Site', async function() {
+		it( 'Login and Select My Site', async () => {
 			loginFlow = new LoginFlow( driver );
 			return await loginFlow.loginAndSelectMySite();
 		} );
 
-		step( 'Can Select Plans', async function() {
+		it( 'Can Select Plans', async () => {
 			const statsPage = await StatsPage.Expect( driver );
 			await statsPage.waitForPage();
 			const sideBarComponent = await SidebarComponent.Expect( driver );
 			return await sideBarComponent.selectPlan();
 		} );
 
-		step( 'Can Select Plans tab', async function() {
+		it( 'Can Select Plans tab', async () => {
 			const plansPage = await PlansPage.Expect( driver );
 			if ( host === 'WPCOM' ) {
 				await plansPage.openPlansTab();
@@ -99,12 +99,12 @@ describe( `[${ host }] Plans: (${ screenSize }) @parallel @jetpack`, function() 
 			return assert( displayed, 'The Jetpack plans are NOT displayed' );
 		} );
 
-		step( 'Select Business Plan', async function() {
+		it( 'Select Business Plan', async () => {
 			const plansPage = await PlansPage.Expect( driver );
 			return await plansPage.selectBusinessPlan();
 		} );
 
-		step( 'Remove any existing coupon', async function() {
+		it( 'Remove any existing coupon', async () => {
 			const planCheckoutPage = await PlanCheckoutPage.Expect( driver );
 
 			if ( await planCheckoutPage.hasCouponApplied() ) {
@@ -112,7 +112,7 @@ describe( `[${ host }] Plans: (${ screenSize }) @parallel @jetpack`, function() 
 			}
 		} );
 
-		step( 'Can Correctly Apply Coupon', async function() {
+		it( 'Can Correctly Apply Coupon', async () => {
 			const planCheckoutPage = await PlanCheckoutPage.Expect( driver );
 
 			await planCheckoutPage.toggleCartSummary();
@@ -126,7 +126,7 @@ describe( `[${ host }] Plans: (${ screenSize }) @parallel @jetpack`, function() 
 			assert.strictEqual( newCartAmount, expectedCartAmount, 'Coupon not applied properly' );
 		} );
 
-		step( 'Can Remove Coupon', async function() {
+		it( 'Can Remove Coupon', async () => {
 			const planCheckoutPage = await PlanCheckoutPage.Expect( driver );
 
 			await planCheckoutPage.removeCoupon();
@@ -135,7 +135,7 @@ describe( `[${ host }] Plans: (${ screenSize }) @parallel @jetpack`, function() 
 			assert.strictEqual( removedCouponAmount, originalCartAmount, 'Coupon not removed properly' );
 		} );
 
-		step( 'Remove from cart', async function() {
+		it( 'Remove from cart', async () => {
 			const planCheckoutPage = await PlanCheckoutPage.Expect( driver );
 
 			return await planCheckoutPage.removeFromCart();

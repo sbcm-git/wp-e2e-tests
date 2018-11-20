@@ -23,15 +23,21 @@ let url;
 
 // FIXME: Skip mobile tests for now. https://github.com/Automattic/wp-e2e-tests/issues/1509
 if ( screenSize !== 'mobile' ) {
-	before( async function() {
-		this.timeout( startBrowserTimeoutMS );
+	beforeAll( async function () {
+		jest.setTimeout( startBrowserTimeoutMS );
 		driver = await driverManager.startBrowser();
 	} );
 
-	describe( `[${ host }] Gutenberg Markdown block: (${ screenSize }) @jetpack`, function() {
-		this.timeout( mochaTimeOut );
+	describe( `[${ host }] Gutenberg Markdown block: (${ screenSize }) @jetpack`, () => {
+		let testContext;
 
-		describe( 'Publish a simple post with Markdown block', function() {
+		beforeEach( () => {
+			testContext = {};
+		} );
+
+		jest.setTimeout( mochaTimeOut );
+
+		describe( 'Publish a simple post with Markdown block', () => {
 			const expectedHTML = `<h3>Header</h3>
 <p>Some <strong>list</strong>:</p>
 <ul>
@@ -41,20 +47,20 @@ if ( screenSize !== 'mobile' ) {
 </ul>
 `;
 			// Easy way to run/develop tests against local WP instance
-			// step( 'Can login to WPORG site', async function() {
+			// it( 'Can login to WPORG site', async function() {
 			// 	const loginPage = await WPAdminLogonPage.Visit( driver, 'http://wpdev.localhost/' );
 			// 	await loginPage.login( 'wordpress', 'wordpress' );
 			// } );
 
-			step( 'Can create wporg site and connect Jetpack', async function() {
-				this.timeout( mochaTimeOut * 12 );
+			it( 'Can create wporg site and connect Jetpack', async () => {
+				jest.setTimeout( mochaTimeOut * 12 );
 				// const jnFlow = new JetpackConnectFlow( driver, 'jetpackConnectUser' );
 				const jnFlow = new JetpackConnectFlow( driver, 'jetpackConnectUser', 'gutenpack' );
 				await jnFlow.connectFromWPAdmin();
 				url = jnFlow.url;
 			} );
 
-			step( 'Can activate Markdown module', async function() {
+			it( 'Can activate Markdown module', async () => {
 				await WPAdminSidebar.refreshIfJNError( driver );
 				const jetpackModulesPage = await WPAdminJetpackModulesPage.Visit(
 					driver,
@@ -64,33 +70,33 @@ if ( screenSize !== 'mobile' ) {
 				await WPAdminJetpackPage.Expect( driver );
 			} );
 
-			step( 'Can start new post', async function() {
+			it( 'Can start new post', async () => {
 				await WPAdminSidebar.refreshIfJNError( driver );
 				const wpAdminSidebar = await WPAdminSidebar.Expect( driver );
 				return await wpAdminSidebar.selectNewPost();
 			} );
 
-			step( 'Can insert a markdown block', async function() {
+			it( 'Can insert a markdown block', async () => {
 				const gHeaderComponent = await GutenbergEditorComponent.Expect( driver );
 				await gHeaderComponent.removeNUXNotice();
-				this.markdownBlockID = await gHeaderComponent.addBlock( 'Markdown' );
+				testContext.markdownBlockID = await gHeaderComponent.addBlock( 'Markdown' );
 			} );
 
-			step( 'Can fill markdown block with content', async function() {
-				this.markdownBlock = await MarkdownBlockComponent.Expect( driver, this.markdownBlockID );
-				return await this.markdownBlock.setContent(
+			it( 'Can fill markdown block with content', async () => {
+				testContext.markdownBlock = await MarkdownBlockComponent.Expect( driver, testContext.markdownBlockID );
+				return await testContext.markdownBlock.setContent(
 					'### Header\nSome **list**:\n\n- item a\n- item b\n- item c\n'
 				);
 			} );
 
-			step( 'Can see rendered content in preview', async function() {
-				await this.markdownBlock.switchPreview();
-				const html = await this.markdownBlock.getPreviewHTML();
+			it( 'Can see rendered content in preview', async () => {
+				await testContext.markdownBlock.switchPreview();
+				const html = await testContext.markdownBlock.getPreviewHTML();
 				assert.equal( html, expectedHTML );
-				await this.markdownBlock.switchMarkdown();
+				await testContext.markdownBlock.switchMarkdown();
 			} );
 
-			step( 'Can publish the post and see its content', async function() {
+			it( 'Can publish the post and see its content', async () => {
 				const gHeaderComponent = await GutenbergEditorComponent.Expect( driver );
 				await gHeaderComponent.publish( { visit: true } );
 				const postFrontend = await PostAreaComponent.Expect( driver );

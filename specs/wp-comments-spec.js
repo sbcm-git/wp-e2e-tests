@@ -20,36 +20,36 @@ const blogPostQuote =
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-describe( `[${ host }] Comments: (${ screenSize })`, function() {
+describe( `[${ host }] Comments: (${ screenSize })`, () => {
 	let fileDetails;
-	this.timeout( mochaTimeoutMS );
+	jest.setTimeout( mochaTimeoutMS );
 
 	// Create image file for upload
-	before( async function() {
+	beforeAll( async function () {
 		fileDetails = await mediaHelper.createFile();
 		return fileDetails;
 	} );
 
-	describe( 'Commenting and replying to newly created post: @parallel @jetpack', function() {
-		step( 'Can login and create a new post', async function() {
+	describe( 'Commenting and replying to newly created post: @parallel @jetpack', () => {
+		it( 'Can login and create a new post', async () => {
 			await new LoginFlow( driver ).loginAndStartNewPost();
 			const editorPage = await EditorPage.Expect( driver );
 			await editorPage.enterTitle( blogPostTitle );
 			await editorPage.enterContent( blogPostQuote + '\n' );
 		} );
 
-		step( 'Can publish and visit site', async function() {
+		it( 'Can publish and visit site', async () => {
 			const postEditorToolbar = await PostEditorToolbarComponent.Expect( driver );
 			await postEditorToolbar.ensureSaved();
 			await postEditorToolbar.publishAndViewContent( { useConfirmStep: true } );
 		} );
 
-		step( 'Can post a comment', async function() {
+		it( 'Can post a comment', async () => {
 			const commentArea = await CommentsAreaComponent.Expect( driver );
 			return await commentArea._postComment( {
 				comment: dataHelper.randomPhrase(),
@@ -58,7 +58,7 @@ describe( `[${ host }] Comments: (${ screenSize })`, function() {
 			} );
 		} );
 
-		step( 'Can post a reply', async function() {
+		it( 'Can post a reply', async () => {
 			await driver.sleep( 10000 ); // Wait to not to post too quickly
 			const commentArea = await CommentsAreaComponent.Expect( driver );
 			await commentArea.reply(

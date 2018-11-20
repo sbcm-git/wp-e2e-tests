@@ -17,15 +17,15 @@ const test_data = localization_data[ locale ];
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-after( function( done ) {
+afterAll( function( done ) {
 	// Wait between tests to not overload Google
 	let wait_seconds = 10;
-	this.timeout( ( wait_seconds + 2 ) * 1e3 );
+	jest.setTimeout( ( wait_seconds + 2 ) * 1e3 );
 	setTimeout( done, wait_seconds * 1e3 );
 } );
 
@@ -38,19 +38,25 @@ function doGoogleAdSearch( search_params ) {
 		' from ' +
 		search_params.comment_location;
 
-	describe( description + ' @i18n (' + locale + ')', function() {
-		this.timeout( mochaTimeOut );
-		before( function() {
+	describe( description + ' @i18n (' + locale + ')', () => {
+		let testContext;
+
+		beforeEach( () => {
+			testContext = {};
+		} );
+
+		jest.setTimeout( mochaTimeOut );
+		beforeAll( function() {
 			if ( locale === 'tr' || locale === 'ar' || locale === 'zh-tw' ) {
 				this.skip( 'Currently no advertising in this locale' );
 			}
 		} );
 
-		beforeEach( async function() {
+		beforeEach( async () => {
 			await driverManager.clearCookiesAndDeleteLocalStorage( driver );
 		} );
 
-		step( 'Google search contains our ad', async function() {
+		it( 'Google search contains our ad', async () => {
 			const googleFlow = new GoogleFlow( driver );
 			await googleFlow.resize( 'desktop' );
 			const that = this;
@@ -62,15 +68,15 @@ function doGoogleAdSearch( search_params ) {
 			}
 		} );
 
-		step( 'Our landing page exists', async function() {
+		it( 'Our landing page exists', async () => {
 			const that = this;
-			let url = await this.searchPage.getAdUrl();
+			let url = await testContext.searchPage.getAdUrl();
 			that.landingPage = await LandingPage.Visit( driver, url );
 			return await that.landingPage.checkURL();
 		} );
 
-		step( 'Localized string found on landing page', async function() {
-			await this.landingPage.checkLocalizedString( test_data.wpcom_landing_page_string );
+		it( 'Localized string found on landing page', async () => {
+			await testContext.landingPage.checkLocalizedString( test_data.wpcom_landing_page_string );
 		} );
 	} );
 }

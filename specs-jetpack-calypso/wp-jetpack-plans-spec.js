@@ -33,54 +33,60 @@ const host = dataHelper.getJetpackHost();
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-describe( `[${ host }] Jetpack Plans: (${ screenSize }) @jetpack`, function() {
-	this.timeout( mochaTimeOut );
+describe( `[${ host }] Jetpack Plans: (${ screenSize }) @jetpack`, () => {
+	let testContext;
 
-	describe( 'Purchase Premium Plan:', function() {
-		before( async function() {
+	beforeEach( () => {
+		testContext = {};
+	} );
+
+	jest.setTimeout( mochaTimeOut );
+
+	describe( 'Purchase Premium Plan:', () => {
+		beforeAll( async function () {
 			return await driverManager.clearCookiesAndDeleteLocalStorage( driver );
 		} );
 
-		step( 'Can log into WordPress.com', async function() {
-			this.loginFlow = new LoginFlow( driver, 'jetpackUser' + host );
-			return await this.loginFlow.login();
+		it( 'Can log into WordPress.com', async () => {
+			testContext.loginFlow = new LoginFlow( driver, 'jetpackUser' + host );
+			return await testContext.loginFlow.login();
 		} );
 
-		step( 'Can log into site via Jetpack SSO', async function() {
+		it( 'Can log into site via Jetpack SSO', async () => {
 			const loginPage = await WPAdminLogonPage.Visit( driver, dataHelper.getJetpackSiteName() );
 			return await loginPage.logonSSO();
 		} );
 
-		step( 'Can open Jetpack dashboard', async function() {
+		it( 'Can open Jetpack dashboard', async () => {
 			await WPAdminSidebar.refreshIfJNError( driver );
 			const wpAdminSidebar = await WPAdminSidebar.Expect( driver );
 			return await wpAdminSidebar.selectJetpack();
 		} );
 
-		step( 'Can find and click Upgrade nudge button', async function() {
+		it( 'Can find and click Upgrade nudge button', async () => {
 			await driverHelper.refreshIfJNError( driver );
 			const jetpackDashboard = await WPAdminJetpackPage.Expect( driver );
 			await driver.sleep( 3000 ); // The nudge buttons are loaded after the page, and there's no good loaded status indicator to key off of
 			return await jetpackDashboard.clickUpgradeNudge();
 		} );
 
-		step( 'Can click the Proceed button', async function() {
+		it( 'Can click the Proceed button', async () => {
 			const jetpackPlanSalesPage = await JetpackPlanSalesPage.Expect( driver );
 			await driver.sleep( 3000 ); // The upgrade buttons are loaded after the page, and there's no good loaded status indicator to key off of
 			return await jetpackPlanSalesPage.clickPurchaseButton();
 		} );
 
-		step( 'Can then see secure payment component', async function() {
+		it( 'Can then see secure payment component', async () => {
 			return await SecurePaymentComponent.Expect( driver );
 		} );
 
 		// Remove all items from basket for clean up
-		after( async function() {
+		afterAll( async function () {
 			await ReaderPage.Visit( driver );
 
 			const navbarComponent = await NavBarComponent.Expect( driver );
@@ -97,17 +103,17 @@ describe( `[${ host }] Jetpack Plans: (${ screenSize }) @jetpack`, function() {
 		} );
 	} );
 
-	describe( 'Renew Premium Plan:', function() {
-		before( async function() {
+	describe( 'Renew Premium Plan:', () => {
+		beforeAll( async function () {
 			return await driverManager.clearCookiesAndDeleteLocalStorage( driver );
 		} );
 
-		step( 'Can log into WordPress.com', async function() {
-			this.loginFlow = new LoginFlow( driver, 'jetpackUserPREMIUM' );
-			return await this.loginFlow.login();
+		it( 'Can log into WordPress.com', async () => {
+			testContext.loginFlow = new LoginFlow( driver, 'jetpackUserPREMIUM' );
+			return await testContext.loginFlow.login();
 		} );
 
-		step( '"Renew Now" link takes user to Payment Details form', async function() {
+		it( '"Renew Now" link takes user to Payment Details form', async () => {
 			const navBarComponent = await NavBarComponent.Expect( driver );
 			await navBarComponent.clickProfileLink();
 			const profilePage = await ProfilePage.Expect( driver );

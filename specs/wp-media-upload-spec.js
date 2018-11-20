@@ -18,41 +18,44 @@ const host = dataHelper.getJetpackHost();
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-describe( `[${ host }] Editor: Media Upload (${ screenSize }) @parallel @jetpack`, function() {
-	this.timeout( mochaTimeOut );
+describe( `[${ host }] Editor: Media Upload (${ screenSize }) @parallel @jetpack`, () => {
+	jest.setTimeout( mochaTimeOut );
 
-	describe( 'Image Upload:', function() {
+	describe( 'Image Upload:', () => {
 		let editorPage;
 
-		before( async function() {
+		beforeAll( async function () {
 			const loginFlow = new LoginFlow( driver );
 			await loginFlow.loginAndStartNewPage();
 			editorPage = await EditorPage.Expect( driver );
 			await editorPage.displayed();
 		} );
 
-		describe( 'Can upload many media types', function() {
-			describe( 'Can upload a normal image', function() {
+		describe( 'Can upload many media types', () => {
+			describe( 'Can upload a normal image', () => {
 				let fileDetails;
 
-				step( 'Navigate to Editor page and create image file for upload', async function() {
-					fileDetails = await mediaHelper.createFileWithFilename( 'normal.jpg' );
-				} );
+				it(
+					'Navigate to Editor page and create image file for upload',
+					async () => {
+						fileDetails = await mediaHelper.createFileWithFilename( 'normal.jpg' );
+					}
+				);
 
-				step( 'Can upload an image', async function() {
+				it( 'Can upload an image', async () => {
 					await editorPage.uploadMedia( fileDetails );
 				} );
 
-				step( 'Can delete image', async function() {
+				it( 'Can delete image', async () => {
 					await editorPage.deleteMedia();
 				} );
 
-				step( 'Clean up', async function() {
+				it( 'Clean up', async () => {
 					await editorPage.dismissMediaModal();
 					if ( fileDetails ) {
 						await mediaHelper.deleteFile( fileDetails );
@@ -60,25 +63,25 @@ describe( `[${ host }] Editor: Media Upload (${ screenSize }) @parallel @jetpack
 				} );
 			} );
 
-			describe( 'Can upload an image with reserved url chars in the filename', function() {
+			describe( 'Can upload an image with reserved url chars in the filename', () => {
 				let fileDetails;
 
-				step( 'Create image file for upload', async function() {
+				it( 'Create image file for upload', async () => {
 					fileDetails = await mediaHelper.createFileWithFilename(
 						'filewith#?#?reservedurlchars.jpg',
 						true
 					);
 				} );
 
-				step( 'Can upload an image', async function() {
+				it( 'Can upload an image', async () => {
 					await editorPage.uploadMedia( fileDetails );
 				} );
 
-				step( 'Can delete image', async function() {
+				it( 'Can delete image', async () => {
 					await editorPage.deleteMedia();
 				} );
 
-				step( 'Clean up', async function() {
+				it( 'Clean up', async () => {
 					await editorPage.dismissMediaModal();
 					if ( fileDetails ) {
 						await mediaHelper.deleteFile( fileDetails );
@@ -86,22 +89,22 @@ describe( `[${ host }] Editor: Media Upload (${ screenSize }) @parallel @jetpack
 				} );
 			} );
 
-			describe( 'Can upload an mp3', function() {
+			describe( 'Can upload an mp3', () => {
 				let fileDetails;
 
-				step( 'Create mp3 for upload', async function() {
+				it( 'Create mp3 for upload', async () => {
 					fileDetails = await mediaHelper.getMP3FileWithFilename( 'new.mp3' );
 				} );
 
-				step( 'Can upload an mp3', async function() {
+				it( 'Can upload an mp3', async () => {
 					await editorPage.uploadMedia( fileDetails );
 				} );
 
-				step( 'Can delete mp3', async function() {
+				it( 'Can delete mp3', async () => {
 					await editorPage.deleteMedia();
 				} );
 
-				step( 'Clean up', async function() {
+				it( 'Clean up', async () => {
 					await editorPage.dismissMediaModal();
 					if ( fileDetails ) {
 						await mediaHelper.deleteFile( fileDetails );
@@ -113,37 +116,37 @@ describe( `[${ host }] Editor: Media Upload (${ screenSize }) @parallel @jetpack
 				let fileDetails;
 				let editorSidebar;
 
-				step( 'Create image file for upload', async function() {
+				it( 'Create image file for upload', async () => {
 					fileDetails = await mediaHelper.createFile();
 				} );
 
-				step( 'Can open Featured Image upload modal', async function() {
+				it( 'Can open Featured Image upload modal', async () => {
 					editorSidebar = await PostEditorSidebarComponent.Expect( driver );
 					await editorSidebar.displayed();
 					await editorSidebar.expandFeaturedImage();
 					await editorSidebar.openFeaturedImageDialog();
 				} );
 
-				step( 'Can set Featured Image', async function() {
+				it( 'Can set Featured Image', async () => {
 					await editorPage.sendFile( fileDetails.file );
 					await editorPage.saveImage( fileDetails.imageName );
 					// Will wait until image is actually shows up on editor page
 					await editorPage.waitUntilFeaturedImageInserted();
 				} );
 
-				step( 'Can remove Featured Image', async function() {
+				it( 'Can remove Featured Image', async () => {
 					await editorSidebar.removeFeaturedImage();
 					await editorSidebar.closeFeaturedImage();
 				} );
 
-				step( 'Can delete uploaded image', async function() {
+				it( 'Can delete uploaded image', async () => {
 					await editorSidebar.expandFeaturedImage();
 					await editorSidebar.openFeaturedImageDialog();
 					await editorPage.selectFirstImage();
 					await editorPage.deleteMedia();
 				} );
 
-				step( 'Clean up', async function() {
+				it( 'Clean up', async () => {
 					await editorPage.dismissMediaModal();
 					if ( fileDetails ) {
 						await mediaHelper.deleteFile( fileDetails );

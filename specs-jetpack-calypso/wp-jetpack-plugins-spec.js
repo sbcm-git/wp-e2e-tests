@@ -19,23 +19,23 @@ const host = dataHelper.getJetpackHost();
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-describe( `[${ host }] Jetpack Sites on Calypso - Existing Plugins: (${ screenSize }) @jetpack`, function() {
-	this.timeout( mochaTimeOut );
+describe( `[${ host }] Jetpack Sites on Calypso - Existing Plugins: (${ screenSize }) @jetpack`, () => {
+	jest.setTimeout( mochaTimeOut );
 
-	before( async function() {
+	beforeAll( async function () {
 		await driverManager.clearCookiesAndDeleteLocalStorage( driver );
 
 		let loginFlow = new LoginFlow( driver, 'jetpackUser' + host );
 		await loginFlow.loginAndSelectManagePlugins();
 	} );
 
-	describe( 'Can activate Hello Dolly', function() {
-		step( 'Ensure Hello Dolly is deactivated', async function() {
+	describe( 'Can activate Hello Dolly', () => {
+		it( 'Ensure Hello Dolly is deactivated', async () => {
 			const pluginsPage = await PluginsPage.Expect( driver );
 			await pluginsPage.viewPlugin( 'hello' );
 			const pluginDetailsPage = await PluginDetailsPage.Expect( driver );
@@ -44,7 +44,7 @@ describe( `[${ host }] Jetpack Sites on Calypso - Existing Plugins: (${ screenSi
 			return await pluginDetailsPage.goBack();
 		} );
 
-		step( 'Can view the plugin details to activate Hello Dolly', async function() {
+		it( 'Can view the plugin details to activate Hello Dolly', async () => {
 			const pluginsPage = await PluginsPage.Expect( driver );
 			await pluginsPage.viewPlugin( 'hello' );
 			const pluginDetailsPage = await PluginDetailsPage.Expect( driver );
@@ -52,7 +52,7 @@ describe( `[${ host }] Jetpack Sites on Calypso - Existing Plugins: (${ screenSi
 			return await pluginDetailsPage.clickActivateToggleForPlugin();
 		} );
 
-		step( 'Success message contains Hello Dolly', async function() {
+		it( 'Success message contains Hello Dolly', async () => {
 			const expectedPartialText = 'Successfully activated Hello Dolly';
 			const pluginDetailsPage = await PluginDetailsPage.Expect( driver );
 			await pluginDetailsPage.waitForSuccessNotice();
@@ -66,20 +66,20 @@ describe( `[${ host }] Jetpack Sites on Calypso - Existing Plugins: (${ screenSi
 	} );
 } );
 
-describe( `[${ host }] Jetpack Sites on Calypso - Searching Plugins: (${ screenSize }) @jetpack`, function() {
-	this.timeout( mochaTimeOut );
+describe( `[${ host }] Jetpack Sites on Calypso - Searching Plugins: (${ screenSize }) @jetpack`, () => {
+	jest.setTimeout( mochaTimeOut );
 
-	before( async function() {
+	beforeAll( async function () {
 		await driverManager.clearCookiesAndDeleteLocalStorage( driver );
 
 		let loginFlow = new LoginFlow( driver, 'jetpackUser' + host );
 		await loginFlow.loginAndSelectPlugins();
 	} );
 
-	describe( 'Can use the plugins browser to find Automattic plugins', function() {
-		step(
+	describe( 'Can use the plugins browser to find Automattic plugins', () => {
+		it(
 			'Open the plugins browser and find WP Job Manager by searching for Automattic',
-			async function() {
+			async () => {
 				const pluginVendor = 'WP Job Manager';
 				const pluginTitle = 'WP Job Manager';
 				const pluginsBrowserPage = await PluginsBrowserPage.Expect( driver );

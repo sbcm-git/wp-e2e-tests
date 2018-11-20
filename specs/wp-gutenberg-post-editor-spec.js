@@ -36,15 +36,21 @@ const host = dataHelper.getJetpackHost();
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
-	this.timeout( mochaTimeOut );
+describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, () => {
+	let testContext;
 
-	describe( 'Public Posts: Preview and Publish a Public Post @parallel', function() {
+	beforeEach( () => {
+		testContext = {};
+	} );
+
+	jest.setTimeout( mochaTimeOut );
+
+	describe( 'Public Posts: Preview and Publish a Public Post @parallel', () => {
 		let fileDetails;
 		const blogPostTitle = dataHelper.randomPhrase();
 		const blogPostQuote =
@@ -53,17 +59,17 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 		const newTagName = 'Tag ' + new Date().getTime().toString();
 
 		// Create image file for upload
-		before( async function() {
+		beforeAll( async function() {
 			fileDetails = await mediaHelper.createFile();
 			return fileDetails;
 		} );
 
-		step( 'Can log in', async function() {
-			this.loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
-			return await this.loginFlow.loginAndStartNewPost( null, true );
+		it( 'Can log in', async () => {
+			testContext.loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
+			return await testContext.loginFlow.loginAndStartNewPost( null, true );
 		} );
 
-		step( 'Can enter post title, content and image', async function() {
+		it( 'Can enter post title, content and image', async () => {
 			const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
 			await gEditorComponent.removeNUXNotice();
 			await gEditorComponent.enterTitle( blogPostTitle );
@@ -80,7 +86,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			);
 		} );
 
-		step( 'Expand Categories and Tags', async function() {
+		it( 'Expand Categories and Tags', async () => {
 			const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
 			await gEditorComponent.openSidebar();
 			const gEditorSidebarComponent = await GutenbergEditorSidebarComponent.Expect( driver );
@@ -90,17 +96,17 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			await gEditorSidebarComponent.expandTags();
 		} );
 
-		step( 'Can add a new category', async function() {
+		it( 'Can add a new category', async () => {
 			const gEditorSidebarComponent = await GutenbergEditorSidebarComponent.Expect( driver );
 			await gEditorSidebarComponent.addNewCategory( newCategoryName );
 		} );
 
-		step( 'Can add a new tag', async function() {
+		it( 'Can add a new tag', async () => {
 			const gEditorSidebarComponent = await GutenbergEditorSidebarComponent.Expect( driver );
 			await gEditorSidebarComponent.addNewTag( newTagName );
 		} );
 
-		step( 'Close categories and tags', async function() {
+		it( 'Close categories and tags', async () => {
 			const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
 			const gEditorSidebarComponent = await GutenbergEditorSidebarComponent.Expect( driver );
 			await gEditorSidebarComponent.selectDocumentTab();
@@ -109,7 +115,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			await gEditorComponent.closeSidebar();
 		} );
 
-		step( 'Can launch post preview', async function() {
+		it( 'Can launch post preview', async () => {
 			const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
 			await gEditorComponent.ensureSaved();
 			await gEditorComponent.launchPreview();
@@ -117,7 +123,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			await driverHelper.switchToWindowByIndex( driver, 1 );
 		} );
 
-		step( 'Can see correct post title in preview', async function() {
+		it( 'Can see correct post title in preview', async () => {
 			const gPreviewComponent = await GutenbergPreviewComponent.Expect( driver );
 			let postTitle = await gPreviewComponent.postTitle();
 			assert.strictEqual(
@@ -127,21 +133,21 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			);
 		} );
 
-		step( 'Can see correct post content in preview', async function() {
+		it( 'Can see correct post content in preview', async () => {
 			const gPreviewComponent = await GutenbergPreviewComponent.Expect( driver );
 			let content = await gPreviewComponent.postContent();
 			assert.strictEqual(
 				content.indexOf( blogPostQuote ) > -1,
 				true,
 				'The post preview content (' +
-					content +
-					') does not include the expected content (' +
-					blogPostQuote +
-					')'
+				content +
+				') does not include the expected content (' +
+				blogPostQuote +
+				')'
 			);
 		} );
 
-		step( 'Can see the post category in preview', async function() {
+		it( 'Can see the post category in preview', async () => {
 			const gPreviewComponent = await GutenbergPreviewComponent.Expect( driver );
 			let categoryDisplayed = await gPreviewComponent.categoryDisplayed();
 			assert.strictEqual(
@@ -151,23 +157,23 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			);
 		} );
 
-		step( 'Can see the image in preview', async function() {
+		it( 'Can see the image in preview', async () => {
 			const gPreviewComponent = await GutenbergPreviewComponent.Expect( driver );
 			let imageDisplayed = await gPreviewComponent.imageDisplayed( fileDetails );
 			assert.strictEqual( imageDisplayed, true, 'Could not see the image in the web preview' );
 		} );
 
-		step( 'Can close preview', async function() {
+		it( 'Can close preview', async () => {
 			await driverHelper.closeCurrentWindow( driver );
 			return await driverHelper.switchToWindowByIndex( driver, 0 );
 		} );
 
-		step( 'Can publish and view content', async function() {
+		it( 'Can publish and view content', async () => {
 			const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
 			await gEditorComponent.publish( { visit: true } );
 		} );
 
-		step( 'Can see correct post title', async function() {
+		it( 'Can see correct post title', async () => {
 			const viewPostPage = await ViewPostPage.Expect( driver );
 			let postTitle = await viewPostPage.postTitle();
 			assert.strictEqual(
@@ -177,21 +183,21 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			);
 		} );
 
-		step( 'Can see correct post content', async function() {
+		it( 'Can see correct post content', async () => {
 			const viewPostPage = await ViewPostPage.Expect( driver );
 			let content = await viewPostPage.postContent();
 			assert.strictEqual(
 				content.indexOf( blogPostQuote ) > -1,
 				true,
 				'The post content (' +
-					content +
-					') does not include the expected content (' +
-					blogPostQuote +
-					')'
+				content +
+				') does not include the expected content (' +
+				blogPostQuote +
+				')'
 			);
 		} );
 
-		step( 'Can see correct post category', async function() {
+		it( 'Can see correct post category', async () => {
 			const viewPostPage = await ViewPostPage.Expect( driver );
 			let categoryDisplayed = await viewPostPage.categoryDisplayed();
 			assert.strictEqual(
@@ -201,18 +207,18 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			);
 		} );
 
-		step( 'Can see the image published', async function() {
+		it( 'Can see the image published', async () => {
 			const viewPostPage = await ViewPostPage.Expect( driver );
 			let imageDisplayed = await viewPostPage.imageDisplayed( fileDetails );
 			assert.strictEqual( imageDisplayed, true, 'Could not see the image in the published post' );
 		} );
 
-		step( 'Can see correct post tag', async function() {
+		it( 'Can see correct post tag', async () => {
 			await SlackNotifier.warn(
 				'The Gutenberg assertion of tagged content is disabled due to inconsistencies which need investigating',
 				{ suppressDuplicateMessages: true }
 			);
-			return this.skip();
+			return testContext.skip();
 			// const viewPostPage = await ViewPostPage.Expect( driver );
 			// let tagDisplayed = await viewPostPage.tagDisplayed();
 			// assert.strictEqual(
@@ -222,7 +228,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			// );
 		} );
 
-		after( async function() {
+		afterAll( async function() {
 			if ( fileDetails ) {
 				await mediaHelper.deleteFile( fileDetails );
 			}
@@ -230,18 +236,18 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 		} );
 	} );
 
-	describe( 'Basic Public Post @canary @parallel', function() {
-		describe( 'Publish a New Post', function() {
+	describe( 'Basic Public Post @canary @parallel', () => {
+		describe( 'Publish a New Post', () => {
 			const blogPostTitle = dataHelper.randomPhrase();
 			const blogPostQuote =
 				'“Whenever you find yourself on the side of the majority, it is time to pause and reflect.”\n- Mark Twain';
 
-			step( 'Can log in', async function() {
-				this.loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
-				return await this.loginFlow.loginAndStartNewPost( null, true );
+			it( 'Can log in', async () => {
+				testContext.loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
+				return await testContext.loginFlow.loginAndStartNewPost( null, true );
 			} );
 
-			step( 'Can enter post title and text content', async function() {
+			it( 'Can enter post title and text content', async () => {
 				const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
 				await gEditorComponent.removeNUXNotice();
 				await gEditorComponent.enterTitle( blogPostTitle );
@@ -255,12 +261,12 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 				);
 			} );
 
-			step( 'Can publish and view content', async function() {
+			it( 'Can publish and view content', async () => {
 				const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
 				await gEditorComponent.publish( { visit: true } );
 			} );
 
-			step( 'Can see correct post title', async function() {
+			it( 'Can see correct post title', async () => {
 				const viewPostPage = await ViewPostPage.Expect( driver );
 				let postTitle = await viewPostPage.postTitle();
 				assert.strictEqual(
@@ -272,17 +278,17 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 		} );
 	} );
 
-	describe( 'Check Activity Log for Public Post @parallel', function() {
+	describe( 'Check Activity Log for Public Post @parallel', () => {
 		const blogPostTitle = dataHelper.randomPhrase();
 		const blogPostQuote =
 			'“We are what we pretend to be, so we must be careful about what we pretend to be.”\n- Kurt Vonnegut';
 
-		step( 'Can log in', async function() {
+		it( 'Can log in', async () => {
 			let loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
 			return await loginFlow.loginAndStartNewPost( null, true );
 		} );
 
-		step( 'Can enter post title and content', async function() {
+		it( 'Can enter post title and content', async () => {
 			const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
 			await gEditorComponent.removeNUXNotice();
 			await gEditorComponent.enterTitle( blogPostTitle );
@@ -292,12 +298,12 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			return assert.strictEqual( errorShown, false, 'There is an error shown on the editor page!' );
 		} );
 
-		step( 'Can publish and view content', async function() {
+		it( 'Can publish and view content', async () => {
 			const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
 			await gEditorComponent.publish( { visit: true } );
 		} );
 
-		step( 'Can see the post in the Activity log', async function() {
+		it( 'Can see the post in the Activity log', async () => {
 			await ReaderPage.Visit( driver );
 			const navBarComponent = await NavBarComponent.Expect( driver );
 			await navBarComponent.clickMySites();
@@ -321,21 +327,21 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 	xdescribe( 'Schedule Basic Public Post @parallel', function() {
 		let publishDate;
 
-		describe( 'Schedule (and remove) a New Post', function() {
+		describe( 'Schedule (and remove) a New Post', () => {
 			const blogPostTitle = dataHelper.randomPhrase();
 			const blogPostQuote = '“Worries shared are worries halved.”\n- Unknown';
 
-			step( 'Can log in', async function() {
-				this.loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
-				return await this.loginFlow.loginAndStartNewPost();
+			it( 'Can log in', async () => {
+				testContext.loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
+				return await testContext.loginFlow.loginAndStartNewPost();
 			} );
 
-			step( 'Can enter post title and content', async function() {
-				this.editorPage = await EditorPage.Expect( driver );
-				await this.editorPage.enterTitle( blogPostTitle );
-				await this.editorPage.enterContent( blogPostQuote + '\n' );
+			it( 'Can enter post title and content', async () => {
+				testContext.editorPage = await EditorPage.Expect( driver );
+				await testContext.editorPage.enterTitle( blogPostTitle );
+				await testContext.editorPage.enterContent( blogPostQuote + '\n' );
 
-				let errorShown = await this.editorPage.errorDisplayed();
+				let errorShown = await testContext.editorPage.errorDisplayed();
 				return assert.strictEqual(
 					errorShown,
 					false,
@@ -343,9 +349,9 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 				);
 			} );
 
-			step(
+			it(
 				'Can schedule content for a future date (first day of second week next month)',
-				async function() {
+				async () => {
 					let postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
 					await postEditorToolbarComponent.ensureSaved( { clickSave: true } );
 					let postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
@@ -361,27 +367,30 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 				}
 			);
 
-			step( 'Can confirm scheduling post and see correct publish date', async function() {
-				const editorConfirmationSidebarComponent = await EditorConfirmationSidebarComponent.Expect(
-					driver
-				);
-				const publishDateShown = await editorConfirmationSidebarComponent.publishDateShown();
-				assert.strictEqual(
-					publishDateShown,
-					publishDate,
-					'The publish date shown is not the expected publish date'
-				);
-				await editorConfirmationSidebarComponent.confirmAndPublish();
-				const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
-				await postEditorToolbarComponent.waitForPostSucessNotice();
-				const postEditorPage = await EditorPage.Expect( driver );
-				return assert(
-					await postEditorPage.postIsScheduled(),
-					'The newly scheduled post is not showing in the editor as scheduled'
-				);
-			} );
+			it(
+				'Can confirm scheduling post and see correct publish date',
+				async () => {
+					const editorConfirmationSidebarComponent = await EditorConfirmationSidebarComponent.Expect(
+						driver
+					);
+					const publishDateShown = await editorConfirmationSidebarComponent.publishDateShown();
+					assert.strictEqual(
+						publishDateShown,
+						publishDate,
+						'The publish date shown is not the expected publish date'
+					);
+					await editorConfirmationSidebarComponent.confirmAndPublish();
+					const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
+					await postEditorToolbarComponent.waitForPostSucessNotice();
+					const postEditorPage = await EditorPage.Expect( driver );
+					return assert(
+						await postEditorPage.postIsScheduled(),
+						'The newly scheduled post is not showing in the editor as scheduled'
+					);
+				}
+			);
 
-			step( 'Remove scheduled post', async function() {
+			it( 'Remove scheduled post', async () => {
 				let postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
 				return await postEditorSidebarComponent.trashPost();
 			} );
@@ -389,53 +398,56 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 	} );
 
 	xdescribe( 'Private Posts: @parallel', function() {
-		describe( 'Publish a Private Post', function() {
+		describe( 'Publish a Private Post', () => {
 			const blogPostTitle = dataHelper.randomPhrase();
 			const blogPostQuote =
 				'If you’re not prepared to be wrong; you’ll never come up with anything original.\n— Sir Ken Robinson\n';
 
-			step( 'Can log in', async function() {
+			it( 'Can log in', async () => {
 				let loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
 				await loginFlow.loginAndStartNewPost();
 			} );
 
-			step( 'Can enter post title and content', async function() {
+			it( 'Can enter post title and content', async () => {
 				let editorPage = await EditorPage.Expect( driver );
 				await editorPage.enterTitle( blogPostTitle );
 				await editorPage.enterContent( blogPostQuote );
 			} );
 
-			step( 'Can disable sharing buttons', async function() {
+			it( 'Can disable sharing buttons', async () => {
 				let postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
 				await postEditorSidebarComponent.expandSharingSection();
 				await postEditorSidebarComponent.setSharingButtons( false );
 				await postEditorSidebarComponent.closeSharingSection();
 			} );
 
-			step( 'Can allow comments', async function() {
+			it( 'Can allow comments', async () => {
 				let postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
 				await postEditorSidebarComponent.expandMoreOptions();
 				await postEditorSidebarComponent.setCommentsForPost( true );
 			} );
 
-			describe( 'Set to private which publishes it', function() {
-				step( 'Ensure the post is saved', async function() {
+			describe( 'Set to private which publishes it', () => {
+				it( 'Ensure the post is saved', async () => {
 					await EditorPage.Expect( driver );
 					const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
 					await postEditorToolbarComponent.ensureSaved();
 				} );
 
-				step( 'Can set visibility to private which immediately publishes it', async function() {
-					const postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
-					await postEditorSidebarComponent.setVisibilityToPrivate();
-					this.postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
-					await this.postEditorToolbarComponent.waitForSuccessViewPostNotice();
-					await this.postEditorToolbarComponent.viewPublishedPostOrPage();
-				} );
+				it(
+					'Can set visibility to private which immediately publishes it',
+					async () => {
+						const postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
+						await postEditorSidebarComponent.setVisibilityToPrivate();
+						testContext.postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
+						await testContext.postEditorToolbarComponent.waitForSuccessViewPostNotice();
+						await testContext.postEditorToolbarComponent.viewPublishedPostOrPage();
+					}
+				);
 
 				if ( host === 'WPCOM' ) {
-					describe( 'As a logged in user ', function() {
-						step( 'Can see correct post title', async function() {
+					describe( 'As a logged in user ', () => {
+						it( 'Can see correct post title', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let postTitle = await viewPostPage.postTitle();
 							assert.strictEqual(
@@ -445,21 +457,21 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( 'Can see correct post content', async function() {
+						it( 'Can see correct post content', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let content = await viewPostPage.postContent();
 							assert.strictEqual(
 								content.indexOf( blogPostQuote ) > -1,
 								true,
 								'The post content (' +
-									content +
-									') does not include the expected content (' +
-									blogPostQuote +
-									')'
+								content +
+								') does not include the expected content (' +
+								blogPostQuote +
+								')'
 							);
 						} );
 
-						step( 'Can see comments enabled', async function() {
+						it( 'Can see comments enabled', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let visible = await viewPostPage.commentsVisible();
 							assert.strictEqual(
@@ -469,7 +481,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( "Can't see sharing buttons", async function() {
+						it( "Can't see sharing buttons", async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let visible = await viewPostPage.sharingButtonsVisible();
 							assert.strictEqual(
@@ -479,13 +491,13 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						describe( 'As a non-logged in user ', function() {
-							before( async function() {
+						describe( 'As a non-logged in user ', () => {
+							beforeAll( async function() {
 								await driverManager.clearCookiesAndDeleteLocalStorage( driver );
 								await driver.navigate().refresh();
 							} );
 
-							step( "Can't see post at all", async function() {
+							it( "Can't see post at all", async () => {
 								let notFoundPage = await NotFoundPage.Expect( driver );
 								let displayed = await notFoundPage.displayed();
 								assert.strictEqual(
@@ -498,8 +510,8 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 					} );
 				} else {
 					// Jetpack tests
-					describe( 'As a non-logged in user ', function() {
-						step( "Can't see post at all", async function() {
+					describe( 'As a non-logged in user ', () => {
+						it( "Can't see post at all", async () => {
 							let notFoundPage = await NotFoundPage.Expect( driver );
 							let displayed = await notFoundPage.displayed();
 							assert.strictEqual(
@@ -516,52 +528,55 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 	} );
 
 	xdescribe( 'Password Protected Posts: @parallel', function() {
-		describe( 'Publish a Password Protected Post', function() {
+		describe( 'Publish a Password Protected Post', () => {
 			let blogPostTitle = dataHelper.randomPhrase();
 			let blogPostQuote =
 				'The best thing about the future is that it comes only one day at a time.\n— Abraham Lincoln\n';
 			let postPassword = 'e2e' + new Date().getTime().toString();
 
-			step( 'Can log in', async function() {
+			it( 'Can log in', async () => {
 				let loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
 				await loginFlow.loginAndStartNewPost();
 			} );
 
-			step( 'Can enter post title and content and set to password protected', async function() {
-				this.editorPage = await EditorPage.Expect( driver );
-				await this.editorPage.enterTitle( blogPostTitle );
-				this.postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
-				await this.postEditorSidebarComponent.setVisibilityToPasswordProtected( postPassword );
-				this.editorPage = await EditorPage.Expect( driver );
-				await this.editorPage.enterContent( blogPostQuote );
-				this.postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
-				await this.postEditorToolbarComponent.ensureSaved();
-			} );
+			it(
+				'Can enter post title and content and set to password protected',
+				async () => {
+					testContext.editorPage = await EditorPage.Expect( driver );
+					await testContext.editorPage.enterTitle( blogPostTitle );
+					testContext.postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
+					await testContext.postEditorSidebarComponent.setVisibilityToPasswordProtected( postPassword );
+					testContext.editorPage = await EditorPage.Expect( driver );
+					await testContext.editorPage.enterContent( blogPostQuote );
+					testContext.postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
+					await testContext.postEditorToolbarComponent.ensureSaved();
+				}
+			);
 
-			step( 'Can enable sharing buttons', async function() {
+			it( 'Can enable sharing buttons', async () => {
 				let postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
 				await postEditorSidebarComponent.expandSharingSection();
 				await postEditorSidebarComponent.setSharingButtons( true );
 				await postEditorSidebarComponent.closeSharingSection();
 			} );
 
-			step( 'Can disallow comments', async function() {
+			it( 'Can disallow comments', async () => {
 				let postEditorSidebarComponent = await PostEditorSidebarComponent.Expect( driver );
 				await postEditorSidebarComponent.expandMoreOptions();
 				await postEditorSidebarComponent.setCommentsForPost( false );
 				await postEditorSidebarComponent.closeMoreOptions();
 			} );
 
-			describe( 'Publish and View', function() {
+			describe( 'Publish and View', () => {
 				// Can publish and view content
-				before( async function() {
+				beforeAll( async function() {
 					const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
 					await postEditorToolbarComponent.publishAndViewContent( { useConfirmStep: true } );
 				} );
 
-				describe( 'As a logged in user', function() {
-					describe( 'With no password entered', function() {
-						step( 'Can view post title', async function() {
+				describe( 'As a logged in user', () => {
+					describe( 'With no password entered', () => {
+						it( 'Can view post title', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let postTitle = await viewPostPage.postTitle();
 							assert.strictEqual(
@@ -570,7 +585,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( 'Can see password field', async function() {
+						it( 'Can see password field', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let isPasswordProtected = await viewPostPage.isPasswordProtected();
 							assert.strictEqual(
@@ -580,21 +595,21 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( "Can't see content when no password is entered", async function() {
+						it( "Can't see content when no password is entered", async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let content = await viewPostPage.postContent();
 							assert.strictEqual(
 								content.indexOf( blogPostQuote ) === -1,
 								true,
 								'The post content (' +
-									content +
-									') displays the expected content (' +
-									blogPostQuote +
-									') when it should be password protected.'
+								content +
+								') displays the expected content (' +
+								blogPostQuote +
+								') when it should be password protected.'
 							);
 						} );
 
-						step( "Can't see comments", async function() {
+						it( "Can't see comments", async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let visible = await viewPostPage.commentsVisible();
 							assert.strictEqual(
@@ -604,7 +619,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( 'Can see sharing buttons', async function() {
+						it( 'Can see sharing buttons', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let visible = await viewPostPage.sharingButtonsVisible();
 							return assert.strictEqual(
@@ -615,15 +630,15 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 						} );
 					} );
 
-					describe( 'With incorrect password entered', function() {
+					describe( 'With incorrect password entered', () => {
 						// Enter incorrect password
-						before( async function() {
+						beforeAll( async function() {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							await viewPostPage.displayed();
 							await viewPostPage.enterPassword( 'password' );
 						} );
 
-						step( 'Can view post title', async function() {
+						it( 'Can view post title', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let postTitle = await viewPostPage.postTitle();
 							assert.strictEqual(
@@ -632,7 +647,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( 'Can see password field', async function() {
+						it( 'Can see password field', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let isPasswordProtected = await viewPostPage.isPasswordProtected();
 							assert.strictEqual(
@@ -642,21 +657,21 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( "Can't see content when incorrect password is entered", async function() {
+						it( "Can't see content when incorrect password is entered", async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let content = await viewPostPage.postContent();
 							assert.strictEqual(
 								content.indexOf( blogPostQuote ) === -1,
 								true,
 								'The post content (' +
-									content +
-									') displays the expected content (' +
-									blogPostQuote +
-									') when it should be password protected.'
+								content +
+								') displays the expected content (' +
+								blogPostQuote +
+								') when it should be password protected.'
 							);
 						} );
 
-						step( "Can't see comments", async function() {
+						it( "Can't see comments", async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let visible = await viewPostPage.commentsVisible();
 							assert.strictEqual(
@@ -666,7 +681,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( 'Can see sharing buttons', async function() {
+						it( 'Can see sharing buttons', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let visible = await viewPostPage.sharingButtonsVisible();
 							assert.strictEqual(
@@ -677,15 +692,15 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 						} );
 					} );
 
-					describe( 'With correct password entered', function() {
+					describe( 'With correct password entered', () => {
 						// Enter correct password
-						before( async function() {
+						beforeAll( async function() {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							await viewPostPage.displayed();
 							await viewPostPage.enterPassword( postPassword );
 						} );
 
-						step( 'Can view post title', async function() {
+						it( 'Can view post title', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let postTitle = await viewPostPage.postTitle();
 							assert.strictEqual(
@@ -694,7 +709,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( "Can't see password field", async function() {
+						it( "Can't see password field", async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let isPasswordProtected = await viewPostPage.isPasswordProtected();
 							assert.strictEqual(
@@ -704,21 +719,21 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( 'Can see page content', async function() {
+						it( 'Can see page content', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let content = await viewPostPage.postContent();
 							assert.strictEqual(
 								content.indexOf( blogPostQuote ) > -1,
 								true,
 								'The post content (' +
-									content +
-									') does not include the expected content (' +
-									blogPostQuote +
-									')'
+								content +
+								') does not include the expected content (' +
+								blogPostQuote +
+								')'
 							);
 						} );
 
-						step( "Can't see comments", async function() {
+						it( "Can't see comments", async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let visible = await viewPostPage.commentsVisible();
 							assert.strictEqual(
@@ -728,7 +743,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( 'Can see sharing buttons', async function() {
+						it( 'Can see sharing buttons', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let visible = await viewPostPage.sharingButtonsVisible();
 							assert.strictEqual(
@@ -739,13 +754,13 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 						} );
 					} );
 				} );
-				describe( 'As a non-logged in user', function() {
-					before( async function() {
+				describe( 'As a non-logged in user', () => {
+					beforeAll( async function() {
 						await driverManager.clearCookiesAndDeleteLocalStorage( driver );
 						await driver.navigate().refresh();
 					} );
-					describe( 'With no password entered', function() {
-						step( 'Can view post title', async function() {
+					describe( 'With no password entered', () => {
+						it( 'Can view post title', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let postTitle = await viewPostPage.postTitle();
 							assert.strictEqual(
@@ -754,7 +769,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( 'Can see password field', async function() {
+						it( 'Can see password field', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let isPasswordProtected = await viewPostPage.isPasswordProtected();
 							assert.strictEqual(
@@ -764,21 +779,21 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( "Can't see content when no password is entered", async function() {
+						it( "Can't see content when no password is entered", async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let content = await viewPostPage.postContent();
 							assert.strictEqual(
 								content.indexOf( blogPostQuote ) === -1,
 								true,
 								'The post content (' +
-									content +
-									') displays the expected content (' +
-									blogPostQuote +
-									') when it should be password protected.'
+								content +
+								') displays the expected content (' +
+								blogPostQuote +
+								') when it should be password protected.'
 							);
 						} );
 
-						step( "Can't see comments", async function() {
+						it( "Can't see comments", async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let visible = await viewPostPage.commentsVisible();
 							assert.strictEqual(
@@ -788,7 +803,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( 'Can see sharing buttons', async function() {
+						it( 'Can see sharing buttons', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let visible = await viewPostPage.sharingButtonsVisible();
 							return assert.strictEqual(
@@ -799,15 +814,15 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 						} );
 					} );
 
-					describe( 'With incorrect password entered', function() {
+					describe( 'With incorrect password entered', () => {
 						// Enter incorrect password
-						before( async function() {
+						beforeAll( async function() {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							await viewPostPage.displayed();
 							await viewPostPage.enterPassword( 'password' );
 						} );
 
-						step( 'Can view post title', async function() {
+						it( 'Can view post title', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let postTitle = await viewPostPage.postTitle();
 							assert.strictEqual(
@@ -816,7 +831,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( 'Can see password field', async function() {
+						it( 'Can see password field', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let isPasswordProtected = await viewPostPage.isPasswordProtected();
 							assert.strictEqual(
@@ -826,21 +841,21 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( "Can't see content when incorrect password is entered", async function() {
+						it( "Can't see content when incorrect password is entered", async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let content = await viewPostPage.postContent();
 							assert.strictEqual(
 								content.indexOf( blogPostQuote ) === -1,
 								true,
 								'The post content (' +
-									content +
-									') displays the expected content (' +
-									blogPostQuote +
-									') when it should be password protected.'
+								content +
+								') displays the expected content (' +
+								blogPostQuote +
+								') when it should be password protected.'
 							);
 						} );
 
-						step( "Can't see comments", async function() {
+						it( "Can't see comments", async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let visible = await viewPostPage.commentsVisible();
 							assert.strictEqual(
@@ -850,7 +865,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( 'Can see sharing buttons', async function() {
+						it( 'Can see sharing buttons', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let visible = await viewPostPage.sharingButtonsVisible();
 							assert.strictEqual(
@@ -861,15 +876,15 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 						} );
 					} );
 
-					describe( 'With correct password entered', function() {
+					describe( 'With correct password entered', () => {
 						// Enter correct password
-						before( async function() {
+						beforeAll( async function() {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							await viewPostPage.displayed();
 							await viewPostPage.enterPassword( postPassword );
 						} );
 
-						step( 'Can view post title', async function() {
+						it( 'Can view post title', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let postTitle = await viewPostPage.postTitle();
 							assert.strictEqual(
@@ -878,7 +893,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( "Can't see password field", async function() {
+						it( "Can't see password field", async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let isPasswordProtected = await viewPostPage.isPasswordProtected();
 							assert.strictEqual(
@@ -888,21 +903,21 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( 'Can see page content', async function() {
+						it( 'Can see page content', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let content = await viewPostPage.postContent();
 							assert.strictEqual(
 								content.indexOf( blogPostQuote ) > -1,
 								true,
 								'The post content (' +
-									content +
-									') does not include the expected content (' +
-									blogPostQuote +
-									')'
+								content +
+								') does not include the expected content (' +
+								blogPostQuote +
+								')'
 							);
 						} );
 
-						step( "Can't see comments", async function() {
+						it( "Can't see comments", async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let visible = await viewPostPage.commentsVisible();
 							assert.strictEqual(
@@ -912,7 +927,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 							);
 						} );
 
-						step( 'Can see sharing buttons', async function() {
+						it( 'Can see sharing buttons', async () => {
 							let viewPostPage = await ViewPostPage.Expect( driver );
 							let visible = await viewPostPage.sharingButtonsVisible();
 							assert.strictEqual(
@@ -927,55 +942,58 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 		} );
 	} );
 
-	describe( 'Trash Post: @parallel', function() {
-		describe( 'Trash a New Post', function() {
+	describe( 'Trash Post: @parallel', () => {
+		describe( 'Trash a New Post', () => {
 			const blogPostTitle = dataHelper.randomPhrase();
 			const blogPostQuote =
 				'The only victory that counts is the victory over yourself.\n— Jesse Owens\n';
 
-			step( 'Can log in', async function() {
+			it( 'Can log in', async () => {
 				const loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
 				return await loginFlow.loginAndStartNewPost( null, true );
 			} );
 
-			step( 'Can enter post title and content', async function() {
+			it( 'Can enter post title and content', async () => {
 				const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
 				await gEditorComponent.removeNUXNotice();
 				await gEditorComponent.enterTitle( blogPostTitle );
 				return await gEditorComponent.enterText( blogPostQuote );
 			} );
 
-			step( 'Can trash the new post', async function() {
+			it( 'Can trash the new post', async () => {
 				const gSidebarComponent = await GutenbergEditorSidebarComponent.Expect( driver );
 				await gSidebarComponent.chooseDocumentSetttings();
 				return await gSidebarComponent.trashPost();
 			} );
 
-			step( 'Can then see the Posts page with a confirmation message', async function() {
-				const wpAdminPostsPage = await WPAdminPostsPage.Expect( driver );
-				const displayed = await wpAdminPostsPage.trashedSuccessNoticeDisplayed();
-				return assert.strictEqual(
-					displayed,
-					true,
-					'The Posts page success notice for deleting the post is not displayed'
-				);
-			} );
+			it(
+				'Can then see the Posts page with a confirmation message',
+				async () => {
+					const wpAdminPostsPage = await WPAdminPostsPage.Expect( driver );
+					const displayed = await wpAdminPostsPage.trashedSuccessNoticeDisplayed();
+					return assert.strictEqual(
+						displayed,
+						true,
+						'The Posts page success notice for deleting the post is not displayed'
+					);
+				}
+			);
 		} );
 	} );
 
-	describe( 'Edit a Post: @parallel', function() {
-		describe( 'Publish a New Post', function() {
+	describe( 'Edit a Post: @parallel', () => {
+		describe( 'Publish a New Post', () => {
 			const originalBlogPostTitle = dataHelper.randomPhrase();
 			const updatedBlogPostTitle = dataHelper.randomPhrase();
 			const blogPostQuote =
 				'Science is organised knowledge. Wisdom is organised life..\n~ Immanuel Kant\n';
 
-			step( 'Can log in', async function() {
+			it( 'Can log in', async () => {
 				const loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
 				return await loginFlow.loginAndStartNewPost( null, true );
 			} );
 
-			step( 'Can enter post title and content', async function() {
+			it( 'Can enter post title and content', async () => {
 				const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
 				await gEditorComponent.removeNUXNotice();
 				await gEditorComponent.enterTitle( originalBlogPostTitle );
@@ -988,13 +1006,13 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 				);
 			} );
 
-			step( 'Can publish the post', async function() {
+			it( 'Can publish the post', async () => {
 				const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
 				await gEditorComponent.publish( { visit: true } );
 			} );
 
-			describe( 'Edit the post via posts', function() {
-				step( 'Can view the posts list', async function() {
+			describe( 'Edit the post via posts', () => {
+				it( 'Can view the posts list', async () => {
 					await ReaderPage.Visit( driver );
 					const navbarComponent = await NavBarComponent.Expect( driver );
 					await navbarComponent.clickMySites();
@@ -1007,7 +1025,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 					return await PostsPage.Expect( driver );
 				} );
 
-				step( 'Can see and edit our new post', async function() {
+				it( 'Can see and edit our new post', async () => {
 					const postsPage = await PostsPage.Expect( driver );
 					await postsPage.waitForPostTitled( originalBlogPostTitle );
 					let displayed = await postsPage.isPostDisplayed( originalBlogPostTitle );
@@ -1020,7 +1038,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 					return await GutenbergEditorComponent.Expect( driver );
 				} );
 
-				step( 'Can see the post title', async function() {
+				it( 'Can see the post title', async () => {
 					const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
 					let titleShown = await gEditorComponent.titleShown();
 					assert.strictEqual(
@@ -1030,9 +1048,9 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 					);
 				} );
 
-				step(
+				it(
 					'Can set the new title and update it, and link to the updated post',
-					async function() {
+					async () => {
 						const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
 
 						await gEditorComponent.enterTitle( updatedBlogPostTitle );
@@ -1042,12 +1060,12 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 					}
 				);
 
-				describe( 'Can view the post with the new title', function() {
-					step( 'Can view the post', async function() {
+				describe( 'Can view the post with the new title', () => {
+					it( 'Can view the post', async () => {
 						return await ViewPostPage.Expect( driver );
 					} );
 
-					step( 'Can see correct post title', async function() {
+					it( 'Can see correct post title', async () => {
 						const viewPostPage = await ViewPostPage.Expect( driver );
 						let postTitle = await viewPostPage.postTitle();
 						return assert.strictEqual(
@@ -1062,20 +1080,20 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 	} );
 
 	xdescribe( 'Insert a contact form: @parallel', function() {
-		describe( 'Publish a New Post with a Contact Form', function() {
+		describe( 'Publish a New Post with a Contact Form', () => {
 			const originalBlogPostTitle = 'Contact Us: ' + dataHelper.randomPhrase();
 
-			step( 'Can log in', async function() {
-				this.loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
-				return await this.loginFlow.loginAndStartNewPost();
+			it( 'Can log in', async () => {
+				testContext.loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
+				return await testContext.loginFlow.loginAndStartNewPost();
 			} );
 
-			step( 'Can insert the contact form', async function() {
-				this.editorPage = await EditorPage.Expect( driver );
-				await this.editorPage.enterTitle( originalBlogPostTitle );
-				await this.editorPage.insertContactForm();
+			it( 'Can insert the contact form', async () => {
+				testContext.editorPage = await EditorPage.Expect( driver );
+				await testContext.editorPage.enterTitle( originalBlogPostTitle );
+				await testContext.editorPage.insertContactForm();
 
-				let errorShown = await this.editorPage.errorDisplayed();
+				let errorShown = await testContext.editorPage.errorDisplayed();
 				return assert.strictEqual(
 					errorShown,
 					false,
@@ -1083,20 +1101,23 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 				);
 			} );
 
-			step( 'Can see the contact form inserted into the visual editor', async function() {
-				this.editorPage = await EditorPage.Expect( driver );
-				return await this.editorPage.ensureContactFormDisplayedInPost();
-			} );
+			it(
+				'Can see the contact form inserted into the visual editor',
+				async () => {
+					testContext.editorPage = await EditorPage.Expect( driver );
+					return await testContext.editorPage.ensureContactFormDisplayedInPost();
+				}
+			);
 
-			step( 'Can publish and view content', async function() {
+			it( 'Can publish and view content', async () => {
 				const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
 				await postEditorToolbarComponent.ensureSaved();
 				await postEditorToolbarComponent.publishAndViewContent( { useConfirmStep: true } );
 			} );
 
-			step( 'Can see the contact form in our published post', async function() {
-				this.viewPostPage = await ViewPostPage.Expect( driver );
-				let displayed = await this.viewPostPage.contactFormDisplayed();
+			it( 'Can see the contact form in our published post', async () => {
+				testContext.viewPostPage = await ViewPostPage.Expect( driver );
+				let displayed = await testContext.viewPostPage.contactFormDisplayed();
 				assert.strictEqual(
 					displayed,
 					true,
@@ -1117,7 +1138,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			email: 'test@wordpress.com',
 		};
 
-		step( 'Can log in', async function() {
+		it( 'Can log in', async () => {
 			if ( host === 'WPCOM' ) {
 				return await new LoginFlow( driver, 'gutenbergSimpleSiteUser' ).loginAndStartNewPost();
 			}
@@ -1125,7 +1146,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			await new LoginFlow( driver, 'jetpackUserPREMIUM' ).loginAndStartNewPost( jetpackUrl );
 		} );
 
-		step( 'Can insert the payment button', async function() {
+		it( 'Can insert the payment button', async () => {
 			const blogPostTitle = 'Payment Button: ' + dataHelper.randomPhrase();
 
 			const editorPage = await EditorPage.Expect( driver );
@@ -1136,18 +1157,21 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			return assert.strictEqual( errorShown, false, 'There is an error shown on the editor page!' );
 		} );
 
-		step( 'Can see the payment button inserted into the visual editor', async function() {
-			const editorPage = await EditorPage.Expect( driver );
-			return await editorPage.ensurePaymentButtonDisplayedInPost();
-		} );
+		it(
+			'Can see the payment button inserted into the visual editor',
+			async () => {
+				const editorPage = await EditorPage.Expect( driver );
+				return await editorPage.ensurePaymentButtonDisplayedInPost();
+			}
+		);
 
-		step( 'Can publish and view content', async function() {
+		it( 'Can publish and view content', async () => {
 			const postEditorToolbarComponent = await PostEditorToolbarComponent.Expect( driver );
 			await postEditorToolbarComponent.ensureSaved();
 			await postEditorToolbarComponent.publishAndViewContent( { useConfirmStep: true } );
 		} );
 
-		step( 'Can see the payment button in our published post', async function() {
+		it( 'Can see the payment button in our published post', async () => {
 			const viewPostPage = await ViewPostPage.Expect( driver );
 			let displayed = await viewPostPage.paymentButtonDisplayed();
 			assert.strictEqual(
@@ -1157,9 +1181,9 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			);
 		} );
 
-		step(
+		it(
 			'The payment button in our published post opens a new Paypal window for payment',
-			async function() {
+			async () => {
 				let numberOfOpenBrowserWindows = await driverHelper.numberOfOpenWindows( driver );
 				assert.strictEqual(
 					numberOfOpenBrowserWindows,
@@ -1176,7 +1200,7 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 					amountDisplayed,
 					`${ paymentButtonDetails.symbol }${ paymentButtonDetails.price } ${
 						paymentButtonDetails.currency
-					}`,
+						}`,
 					"The amount displayed on Paypal isn't correct"
 				);
 				await driverHelper.closeCurrentWindow( driver );
@@ -1186,23 +1210,23 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 			}
 		);
 
-		after( async function() {
+		afterAll( async function() {
 			await driverHelper.ensurePopupsClosed( driver );
 		} );
 	} );
 
-	describe( 'Revert a post to draft: @parallel', function() {
-		describe( 'Publish a new post', function() {
+	describe( 'Revert a post to draft: @parallel', () => {
+		describe( 'Publish a new post', () => {
 			const originalBlogPostTitle = dataHelper.randomPhrase();
 			const blogPostQuote =
 				'To really be of help to others we need to be guided by compassion.\n— Dalai Lama\n';
 
-			step( 'Can log in', async function() {
+			it( 'Can log in', async () => {
 				const loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
 				return await loginFlow.loginAndStartNewPost( null, true );
 			} );
 
-			step( 'Can enter post title and content', async function() {
+			it( 'Can enter post title and content', async () => {
 				const gHeaderComponent = await GutenbergEditorComponent.Expect( driver );
 				await gHeaderComponent.removeNUXNotice();
 				await gHeaderComponent.enterTitle( originalBlogPostTitle );
@@ -1216,15 +1240,15 @@ describe( `[${ host }] Gutenberg Editor: Posts (${ screenSize })`, function() {
 				);
 			} );
 
-			step( 'Can publish the post', async function() {
+			it( 'Can publish the post', async () => {
 				const gHeaderComponent = await GutenbergEditorComponent.Expect( driver );
 				await gHeaderComponent.publish();
 				return await gHeaderComponent.closePublishedPanel();
 			} );
 		} );
 
-		describe( 'Revert the post to draft', function() {
-			step( 'Can revert the post to draft', async function() {
+		describe( 'Revert the post to draft', () => {
+			it( 'Can revert the post to draft', async () => {
 				const gHeaderComponent = await GutenbergEditorComponent.Expect( driver );
 				await gHeaderComponent.revertToDraft();
 				let isDraft = await gHeaderComponent.isDraft();

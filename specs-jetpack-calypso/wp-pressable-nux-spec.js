@@ -27,93 +27,102 @@ let driver;
 // tl;dr: There is a bug in my.pressable.com which cause some noise/warnings/errors
 // We shouldn't create new Pressable sites for every test.
 if ( false ) {
-	before( async function() {
-		this.timeout( startBrowserTimeoutMS );
+	beforeAll( async function () {
+		jest.setTimeout( startBrowserTimeoutMS );
 		driver = await driverManager.startBrowser();
 	} );
 
-	describe( `[${ host }] Pressable NUX: (${ screenSize })`, function() {
-		this.timeout( mochaTimeOut * 2 );
+	describe( `[${ host }] Pressable NUX: (${ screenSize })`, () => {
+		let testContext;
 
-		describe( 'Disconnect expired sites: @parallel @jetpack', function() {
+		beforeEach( () => {
+			testContext = {};
+		} );
+
+		jest.setTimeout( mochaTimeOut * 2 );
+
+		describe( 'Disconnect expired sites: @parallel @jetpack', () => {
 			const timeout = mochaTimeOut * 10;
 
-			this.timeout( timeout );
+			jest.setTimeout( timeout );
 
-			before( async function() {
+			beforeAll( async function () {
 				return await driverManager.ensureNotLoggedIn( driver );
 			} );
 
-			step( 'Can disconnect any expired sites', async function() {
+			it( 'Can disconnect any expired sites', async () => {
 				return await new JetpackConnectFlow( driver ).removeSites( timeout );
 			} );
 		} );
 
-		describe( 'Connect via Pressable @parallel @jetpack', function() {
-			before( async function() {
+		describe( 'Connect via Pressable @parallel @jetpack', () => {
+			beforeAll( async function () {
 				return await driverManager.ensureNotLoggedIn( driver );
 			} );
 
-			step( 'Can log into WordPress.com', async function() {
+			it( 'Can log into WordPress.com', async () => {
 				return await new LoginFlow( driver, 'jetpackUser' + host ).login();
 			} );
 
-			step( 'Can log into Pressable', async function() {
+			it( 'Can log into Pressable', async () => {
 				const pressableLogonPage = await PressableLogonPage.Visit( driver );
 				return await pressableLogonPage.loginWithWP();
 			} );
 
-			step( 'Can approve login with WordPress', async function() {
+			it( 'Can approve login with WordPress', async () => {
 				const pressableApprovePage = await PressableApprovePage.Expect( driver );
 				return await pressableApprovePage.approve();
 			} );
 
-			step( 'Can create new site', async function() {
-				this.siteName = dataHelper.getNewBlogName();
-				this.pressableSitesPage = await PressableSitesPage.Expect( driver );
-				return await this.pressableSitesPage.addNewSite( this.siteName );
+			it( 'Can create new site', async () => {
+				testContext.siteName = dataHelper.getNewBlogName();
+				testContext.pressableSitesPage = await PressableSitesPage.Expect( driver );
+				return await testContext.pressableSitesPage.addNewSite( testContext.siteName );
 			} );
 
-			step( 'Can go to site settings', async function() {
-				return await this.pressableSitesPage.gotoSettings( this.siteName );
+			it( 'Can go to site settings', async () => {
+				return await testContext.pressableSitesPage.gotoSettings( testContext.siteName );
 			} );
 
-			step( 'Can proceed to Jetpack activation', async function() {
+			it( 'Can proceed to Jetpack activation', async () => {
 				const siteSettings = await PressableSiteSettingsPage.Expect( driver );
 				await siteSettings.waitForJetpackPremium();
 				return await siteSettings.activateJetpackPremium();
 			} );
 
-			step( 'Can approve connection on the authorization page', async function() {
+			it( 'Can approve connection on the authorization page', async () => {
 				const jetpackAuthorizePage = await JetpackAuthorizePage.Expect( driver );
 				return await jetpackAuthorizePage.approveConnection();
 			} );
 
-			step( 'Can wait for 30 sec until Jetpack Rewind will be ready for configuration', function() {
-				return driver.sleep( 30000 );
-			} );
+			it(
+				'Can wait for 30 sec until Jetpack Rewind will be ready for configuration',
+				() => {
+					return driver.sleep( 30000 );
+				}
+			);
 
-			step( 'Can proceed with Pressable NUX flow', async function() {
+			it( 'Can proceed with Pressable NUX flow', async () => {
 				return await new PressableNUXFlow( driver ).addSiteCredentials();
 			} );
 
-			step( 'Can open Rewind activity page', async function() {
+			it( 'Can open Rewind activity page', async () => {
 				await ReaderPage.Visit( driver );
 				const navBarComponent = await NavBarComponent.Expect( driver );
 				await navBarComponent.clickMySites();
 				const sidebarComponent = await SidebarComponent.Expect( driver );
 				await sidebarComponent.selectSiteSwitcher();
-				await sidebarComponent.searchForSite( this.siteName );
+				await sidebarComponent.searchForSite( testContext.siteName );
 				await sidebarComponent.selectActivity();
 			} );
 
 			// Disabled due to to longer time is required to make a backup.
-			// step( 'Can wait until Rewind backup is completed', function() {
+			// it( 'Can wait until Rewind backup is completed', function() {
 			// 	const activityPage = new ActivityPage( driver );
 			// 	return activityPage.waitUntilBackupCompleted();
 			// } );
 
-			after( async function() {
+			afterAll( async function () {
 				const pressableSitesPage = await PressableSitesPage.Visit( driver );
 				return await pressableSitesPage.deleteFirstSite();
 			} );

@@ -24,58 +24,64 @@ const host = dataHelper.getJetpackHost();
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-describe( `[${ host }] Previewing Themes: (${ screenSize })`, function() {
-	this.timeout( mochaTimeOut );
+describe( `[${ host }] Previewing Themes: (${ screenSize })`, () => {
+	let testContext;
 
-	describe( 'Previewing Themes @parallel @jetpack', function() {
-		step( 'Delete Cookies and Login', async function() {
+	beforeEach( () => {
+		testContext = {};
+	} );
+
+	jest.setTimeout( mochaTimeOut );
+
+	describe( 'Previewing Themes @parallel @jetpack', () => {
+		it( 'Delete Cookies and Login', async () => {
 			let loginFlow = new LoginFlow( driver );
 			await loginFlow.loginAndSelectThemes();
 		} );
 
-		describe( 'Can preview free themes', function() {
-			step( 'Can select a different free theme', async function() {
-				this.themesPage = await ThemesPage.Expect( driver );
-				await this.themesPage.waitUntilThemesLoaded();
-				await this.themesPage.showOnlyFreeThemes();
-				await this.themesPage.searchFor( 'Twenty S' );
-				await this.themesPage.waitForThemeStartingWith( 'Twenty S' );
-				return await this.themesPage.selectNewThemeStartingWith( 'Twenty S' );
+		describe( 'Can preview free themes', () => {
+			it( 'Can select a different free theme', async () => {
+				testContext.themesPage = await ThemesPage.Expect( driver );
+				await testContext.themesPage.waitUntilThemesLoaded();
+				await testContext.themesPage.showOnlyFreeThemes();
+				await testContext.themesPage.searchFor( 'Twenty S' );
+				await testContext.themesPage.waitForThemeStartingWith( 'Twenty S' );
+				return await testContext.themesPage.selectNewThemeStartingWith( 'Twenty S' );
 			} );
 
-			step( 'Can see theme details page and open the live demo', async function() {
-				this.themeDetailPage = await ThemeDetailPage.Expect( driver );
-				return await this.themeDetailPage.openLiveDemo();
+			it( 'Can see theme details page and open the live demo', async () => {
+				testContext.themeDetailPage = await ThemeDetailPage.Expect( driver );
+				return await testContext.themeDetailPage.openLiveDemo();
 			} );
 
-			step( 'Activate button appears on the theme preview page', async function() {
-				this.themePreviewPage = await ThemePreviewPage.Expect( driver );
-				await this.themePreviewPage.activateButtonVisible();
+			it( 'Activate button appears on the theme preview page', async () => {
+				testContext.themePreviewPage = await ThemePreviewPage.Expect( driver );
+				await testContext.themePreviewPage.activateButtonVisible();
 			} );
 		} );
 	} );
 } );
 
-describe( `[${ host }] Activating Themes: (${ screenSize }) @parallel @jetpack`, function() {
-	this.timeout( mochaTimeOut );
-	describe( 'Activating Themes:', function() {
-		step( 'Login', async function() {
+describe( `[${ host }] Activating Themes: (${ screenSize }) @parallel @jetpack`, () => {
+	jest.setTimeout( mochaTimeOut );
+	describe( 'Activating Themes:', () => {
+		it( 'Login', async () => {
 			let loginFlow = new LoginFlow( driver );
 			return await loginFlow.loginAndSelectMySite();
 		} );
 
-		step( 'Can open Themes menu', async function() {
+		it( 'Can open Themes menu', async () => {
 			let sidebarComponent = await SidebarComponent.Expect( driver );
 			return await sidebarComponent.selectThemes();
 		} );
 
-		describe( 'Can switch free themes', function() {
-			step( 'Can activate a different free theme', async function() {
+		describe( 'Can switch free themes', () => {
+			it( 'Can activate a different free theme', async () => {
 				let themesPage = await ThemesPage.Expect( driver );
 				await themesPage.waitUntilThemesLoaded();
 				await themesPage.showOnlyFreeThemes();
@@ -87,22 +93,22 @@ describe( `[${ host }] Activating Themes: (${ screenSize }) @parallel @jetpack`,
 				return await themesPage.clickPopoverItem( 'Activate' );
 			} );
 
-			step( 'Can see the theme thanks dialog', async function() {
+			it( 'Can see the theme thanks dialog', async () => {
 				const themeDialogComponent = await ThemeDialogComponent.Expect( driver );
 				await themeDialogComponent.customizeSite();
 			} );
 
 			if ( host === 'WPCOM' ) {
-				step( 'Can customize the site from the theme thanks dialog', async function() {
+				it( 'Can customize the site from the theme thanks dialog', async () => {
 					return await CustomizerPage.Expect( driver );
 				} );
 			} else {
-				step( 'Can log in via Jetpack SSO', async function() {
+				it( 'Can log in via Jetpack SSO', async () => {
 					const wpAdminLogonPage = await WPAdminLogonPage.Expect( driver );
 					return await wpAdminLogonPage.logonSSO();
 				} );
 
-				step( 'Can customize the site from the theme thanks dialog', async function() {
+				it( 'Can customize the site from the theme thanks dialog', async () => {
 					await WPAdminCustomizerPage.refreshIfJNError( driver );
 					return await WPAdminCustomizerPage.Expect( driver );
 				} );

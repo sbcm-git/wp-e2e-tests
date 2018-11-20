@@ -18,25 +18,25 @@ const screenSize = driverManager.currentScreenSize();
 
 let driver;
 
-before( async function() {
-	this.timeout( startBrowserTimeoutMS );
+beforeAll( async function() {
+	jest.setTimeout( startBrowserTimeoutMS );
 	driver = await driverManager.startBrowser();
 } );
 
-describe( 'Verify Import Option: (' + screenSize + ') @parallel', function() {
-	this.timeout( mochaTimeOut );
+describe( 'Verify Import Option: (' + screenSize + ') @parallel', () => {
+	jest.setTimeout( mochaTimeOut );
 
-	step( 'Can log in as default user', async function() {
+	it( 'Can log in as default user', async () => {
 		const loginFlow = new LoginFlow( driver );
 		return await loginFlow.login();
 	} );
 
-	step( 'Can open the sidebar', async function() {
+	it( 'Can open the sidebar', async () => {
 		const navBarComponent = await NavBarComponent.Expect( driver );
 		await navBarComponent.clickMySites();
 	} );
 
-	step( "Can see an 'Import' option", async function() {
+	it( "Can see an 'Import' option", async () => {
 		const sideBarComponent = await SideBarComponent.Expect( driver );
 		return assert(
 			await sideBarComponent.settingsOptionExists(),
@@ -44,23 +44,23 @@ describe( 'Verify Import Option: (' + screenSize + ') @parallel', function() {
 		);
 	} );
 
-	step( "Following 'Import' menu option opens the Import page", async function() {
+	it( "Following 'Import' menu option opens the Import page", async () => {
 		const sideBarComponent = await SideBarComponent.Expect( driver );
 		await sideBarComponent.selectImport();
 		await ImporterPage.Expect( driver );
 	} );
 
-	step( 'Can see the WordPress importer', async function() {
+	it( 'Can see the WordPress importer', async () => {
 		const importerPage = await ImporterPage.Expect( driver );
 		assert( await importerPage.importerIsDisplayed( 'wordpress' ) );
 	} );
 
-	step( 'Can see the Medium importer', async function() {
+	it( 'Can see the Medium importer', async () => {
 		const importerPage = await ImporterPage.Expect( driver );
 		assert( await importerPage.importerIsDisplayed( 'medium' ) );
 	} );
 
-	step( 'Can see the Blogger importer', async function() {
+	it( 'Can see the Blogger importer', async () => {
 		const importerPage = await ImporterPage.Expect( driver );
 		assert( await importerPage.importerIsDisplayed( 'blogger-alt' ) );
 	} );
